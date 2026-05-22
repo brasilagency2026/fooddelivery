@@ -186,7 +186,7 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
             ITENS DO PEDIDO
           </h3>
           <div className="flex flex-col gap-2">
-            {order.items.map((item, i) => (
+            {order.items.map((item: any, i: number) => (
               <div key={i} className="flex justify-between text-sm">
                 <span style={{ color: "var(--color-text-muted)" }}>
                   {item.quantity}x {item.name}
