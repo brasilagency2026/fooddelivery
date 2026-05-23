@@ -85,8 +85,15 @@ export const createOrder = mutation({
     deliveryFee: v.number(),
   },
   handler: async (ctx, args) => {
+    const restaurant = await ctx.db.get(args.restaurantId);
+    if (!restaurant) throw new Error("Restaurant not found");
+
+    const newOrderNumber = (restaurant.currentOrderNumber || 0) + 1;
+    await ctx.db.patch(args.restaurantId, { currentOrderNumber: newOrderNumber });
+
     return await ctx.db.insert("orders", {
       ...args,
+      orderNumber: newOrderNumber,
       status: "pending",
       paymentStatus: "pending",
       createdAt: Date.now(),

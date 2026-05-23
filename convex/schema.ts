@@ -21,6 +21,7 @@ export default defineSchema({
     city: v.optional(v.string()), // e.g. "São Paulo"
     citySlug: v.optional(v.string()), // e.g. "sao-paulo"
     restaurantSlug: v.optional(v.string()), // e.g. "pizza-pronto"
+    currentOrderNumber: v.optional(v.number()), // Resets when opening
   })
     .index("by_owner", ["ownerId"])
     .index("by_status", ["approvalStatus", "isOpen"])
@@ -46,6 +47,7 @@ export default defineSchema({
 
   orders: defineTable({
     restaurantId: v.id("restaurants"),
+    orderNumber: v.optional(v.number()), // e.g. 1, 2, 3...
     customerName: v.string(),
     customerPhone: v.string(),
     deliveryAddress: v.object({

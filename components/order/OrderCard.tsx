@@ -22,6 +22,7 @@ const NEXT_STATUS: Record<string, { status: string; label: string; color: string
 
 interface Order {
   _id: string;
+  orderNumber?: number;
   customerName: string;
   customerPhone: string;
   deliveryAddress: {
@@ -48,6 +49,8 @@ export function OrderCard({ order }: { order: Order }) {
 
   const nextAction = NEXT_STATUS[order.status];
   const timeAgo = formatTimeAgo(order.createdAt);
+  
+  const displayOrderNumber = order.orderNumber ? `#${String(order.orderNumber).padStart(4, "0")}` : "";
 
   async function handleStatusChange() {
     if (!nextAction) return;
@@ -78,7 +81,10 @@ export function OrderCard({ order }: { order: Order }) {
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-bold">{order.customerName}</span>
+              <span className="font-bold">
+                {displayOrderNumber && <span style={{ color: "var(--color-orange)" }} className="mr-1">{displayOrderNumber}</span>}
+                {order.customerName}
+              </span>
               <span className={`text-xs px-2 py-0.5 rounded-full status-${order.status}`}>
                 {STATUS_LABELS[order.status]}
               </span>

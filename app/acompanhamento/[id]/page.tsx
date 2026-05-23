@@ -77,6 +77,8 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
   const isDelivered = order.status === "delivered";
 
+  const displayOrderNumber = order.orderNumber ? `#${String(order.orderNumber).padStart(4, "0")}` : `#${params.id.slice(-6).toUpperCase()}`;
+
   return (
     <div className="min-h-dvh pb-10" style={{ background: "var(--color-bg)" }}>
       {/* Header */}
@@ -88,7 +90,7 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
           {isCanceled ? "Pedido cancelado" : isDelivered ? "Pedido entregue!" : "Acompanhe seu pedido"}
         </h1>
         <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-          Atualização em tempo real · Pedido #{params.id.slice(-6).toUpperCase()}
+          Atualização em tempo real · Pedido {displayOrderNumber}
         </p>
       </header>
 

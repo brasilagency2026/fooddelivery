@@ -175,11 +175,21 @@ export const toggleRestaurantOpen = mutation({
     ownerId: v.string(),
   },
   handler: async (ctx, args) => {
-    const restaurant = await ctx.db.get(args.restaurantId);
-    if (!restaurant || restaurant.ownerId !== args.ownerId) {
-      throw new Error("Unauthorized");
+    const { restaurantId, ownerId } = args;
+    const restaurant = await ctx.db.get(restaurantId);
+    if (!restaurant) throw new Error("Restaurant not found");
+    if (restaurant.ownerId !== ownerId) throw new Error("Unauthorized");
+
+    const newIsOpen = !restaurant.isOpen;
+    
+    // Reset the order number counter if opening the restaurant
+    const updates: any = { isOpen: newIsOpen };
+    if (newIsOpen) {
+      updates.currentOrderNumber = 0;
     }
-    await ctx.db.patch(args.restaurantId, { isOpen: !restaurant.isOpen });
+
+    await ctx.db.patch(restaurantId, updates);
+    return newIsOpen;
   },
 });
 
