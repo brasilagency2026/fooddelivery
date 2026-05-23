@@ -76,13 +76,38 @@ export default function AdminSignUpPage() {
 
       {/* Right panel - Clerk Auth */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
-        {/* Mobile Logo (only visible on small screens) */}
-        <div className="mb-8 text-center lg:hidden">
-          <div className="text-4xl mb-3">🍔</div>
-          <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
-            Área dos restaurantes
-          </p>
+        {/* Mobile Header & Value Prop (only visible on small screens) */}
+        <div className="mb-8 w-full max-w-sm lg:hidden">
+          <div className="text-center mb-6">
+            <div className="text-4xl mb-3">🍔</div>
+            <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto</h1>
+            <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+              Portal do Parceiro
+            </p>
+          </div>
+          
+          <ul className="text-sm font-light flex flex-col gap-2 mb-2 p-4 rounded-xl" style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Simples:</strong> Cadastro na hora</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Mercado Pago:</strong> Sem maquininha</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Seguro:</strong> Receba antes de entregar</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">R$ 150/mês fixo:</strong> Sem surpresas</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">30 Dias Grátis:</strong> Teste sem risco</span>
+            </li>
+          </ul>
         </div>
 
         <SignUp
