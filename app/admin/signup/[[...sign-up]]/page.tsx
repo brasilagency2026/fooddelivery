@@ -30,11 +30,11 @@ export default function AdminSignUpPage() {
           }}
         />
         {/* Transparent Graphic Vector */}
-        <div className="absolute top-20 -right-20 z-0 opacity-40 w-[600px] h-[600px] pointer-events-none transition-transform duration-1000 hover:scale-105">
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 z-0 opacity-80 w-[700px] h-[700px] pointer-events-none transition-transform duration-1000 hover:scale-105 mix-blend-screen" style={{ transform: "translate(20%, -50%)" }}>
           <img 
-            src="https://api.iconify.design/ic:round-delivery-dining.svg?color=white" 
+            src="/delivery-courier-isolated.png" 
             alt="Delivery Courier Graphic"
-            className="w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,107,53,0.5)]"
+            className="w-full h-full object-contain"
           />
         </div>
         
@@ -82,9 +82,9 @@ export default function AdminSignUpPage() {
           <div className="text-center mb-6">
             <div className="flex justify-center mb-4">
               <img 
-                src="https://api.iconify.design/ic:round-delivery-dining.svg?color=%23FF6B35" 
+                src="/delivery-courier-isolated.png" 
                 alt="Delivery Courier Graphic"
-                className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(255,107,53,0.4)]"
+                className="w-32 h-32 object-contain mix-blend-screen"
               />
             </div>
             <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto Delivery</h1>
