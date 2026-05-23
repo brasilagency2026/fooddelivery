@@ -30,11 +30,11 @@ export default function AdminSignUpPage() {
           }}
         />
         {/* Transparent Graphic Vector */}
-        <div className="absolute top-20 -right-20 z-0 opacity-30 w-[500px] h-[500px] pointer-events-none transition-transform duration-1000 hover:scale-105">
+        <div className="absolute top-20 -right-20 z-0 opacity-40 w-[600px] h-[600px] pointer-events-none transition-transform duration-1000 hover:scale-105">
           <img 
-            src="https://cdn-icons-png.flaticon.com/512/2950/2950664.png" 
-            alt="Delivery Scooter Graphic"
-            className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,107,53,0.3)]"
+            src="https://api.iconify.design/ic:round-delivery-dining.svg?color=white" 
+            alt="Delivery Courier Graphic"
+            className="w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,107,53,0.5)]"
           />
         </div>
         
@@ -80,7 +80,13 @@ export default function AdminSignUpPage() {
         {/* Mobile Header & Value Prop (only visible on small screens) */}
         <div className="mb-8 w-full max-w-sm lg:hidden">
           <div className="text-center mb-6">
-            <div className="text-4xl mb-3">🛵</div>
+            <div className="flex justify-center mb-4">
+              <img 
+                src="https://api.iconify.design/ic:round-delivery-dining.svg?color=%23FF6B35" 
+                alt="Delivery Courier Graphic"
+                className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(255,107,53,0.4)]"
+              />
+            </div>
             <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto Delivery</h1>
             <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
               Portal do Parceiro
