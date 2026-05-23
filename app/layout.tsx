@@ -21,7 +21,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <ClerkProvider localization={ptBR as any}>
+        <ClerkProvider
+          localization={ptBR as any}
+          signInUrl="/admin/login"
+          signUpUrl="/admin/login"
+          signInFallbackRedirectUrl="/admin/dashboard"
+          signUpFallbackRedirectUrl="/admin/dashboard"
+        >
           <ConvexClientProvider>{children}</ConvexClientProvider>
         </ClerkProvider>
       </body>
