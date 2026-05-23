@@ -86,12 +86,22 @@ export const getRestaurantBySlug = query({
     restaurantSlug: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    let restaurant = await ctx.db
       .query("restaurants")
       .withIndex("by_slug", (q) => 
         q.eq("state", args.state).eq("citySlug", args.citySlug).eq("restaurantSlug", args.restaurantSlug)
       )
       .first();
+      
+    if (!restaurant) {
+      try {
+        restaurant = await ctx.db.get(args.restaurantSlug as any);
+      } catch (e) {
+        // Not a valid ID, ignore
+      }
+    }
+    
+    return restaurant;
   },
 });
 
