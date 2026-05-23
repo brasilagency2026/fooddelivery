@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 // Get all menu items for a restaurant
 export const getMenuItems = query({
@@ -36,11 +37,25 @@ export const addMenuItem = mutation({
     description: v.string(),
     price: v.number(),
     imageUrl: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    let finalImageUrl = args.imageUrl;
+    
+    // If a file was uploaded to Convex Storage, resolve its permanent URL
+    if (args.storageId) {
+      const url = await ctx.storage.getUrl(args.storageId);
+      if (url) finalImageUrl = url;
+    }
+
     return await ctx.db.insert("menuItems", {
-      ...args,
+      restaurantId: args.restaurantId,
+      name: args.name,
+      description: args.description,
+      price: args.price,
+      imageUrl: finalImageUrl,
+      category: args.category,
       isAvailable: true,
     });
   },
@@ -54,13 +69,22 @@ export const updateMenuItem = mutation({
     description: v.optional(v.string()),
     price: v.optional(v.number()),
     imageUrl: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
     isAvailable: v.optional(v.boolean()),
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { menuItemId, ...updates } = args;
+    const { menuItemId, storageId, ...updates } = args;
+    
+    let finalUpdates: any = { ...updates };
+    
+    if (storageId) {
+      const url = await ctx.storage.getUrl(storageId);
+      if (url) finalUpdates.imageUrl = url;
+    }
+
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, v]) => v !== undefined)
+      Object.entries(finalUpdates).filter(([, v]) => v !== undefined)
     );
     await ctx.db.patch(menuItemId, filteredUpdates);
   },

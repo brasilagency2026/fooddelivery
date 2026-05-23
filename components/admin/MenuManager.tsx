@@ -145,26 +145,96 @@ function ItemForm({
   onClose: () => void;
   onSave: (data: any) => Promise<void>;
 }) {
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  
   const [form, setForm] = useState({
     name: editingItem?.name || "",
     description: editingItem?.description || "",
     price: editingItem?.price || 0,
-    imageUrl: editingItem?.imageUrl || "",
     category: editingItem?.category || "",
   });
+  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(editingItem?.imageUrl || null);
   const [saving, setSaving] = useState(false);
+
+  async function compressImage(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Falha na compressão da imagem"));
+          },
+          "image/jpeg",
+          0.8 // 80% quality
+        );
+      };
+      img.onerror = (err) => reject(err);
+    });
+  }
 
   async function handleSubmit() {
     if (!form.name || !form.price) return;
     setSaving(true);
     try {
+      let storageId: Id<"_storage"> | undefined;
+
+      if (selectedFile) {
+        // 1. Compress image
+        const compressedBlob = await compressImage(selectedFile);
+        
+        // 2. Get upload URL from Convex
+        const uploadUrl = await generateUploadUrl();
+        
+        // 3. Upload file
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: compressedBlob,
+        });
+
+        if (!result.ok) throw new Error("Falha no upload da imagem");
+        const { storageId: uploadedStorageId } = await result.json();
+        storageId = uploadedStorageId;
+      }
+
       await onSave({
         name: form.name,
         description: form.description,
         price: Number(form.price),
-        imageUrl: form.imageUrl || undefined,
         category: form.category || undefined,
+        storageId: storageId,
+        // If no new file was selected, keep the old imageUrl. Otherwise, the backend will resolve the new storageId.
+        imageUrl: !selectedFile ? editingItem?.imageUrl : undefined, 
       });
+    } catch (e: any) {
+      alert("Erro ao salvar: " + e.message);
     } finally {
       setSaving(false);
     }
@@ -172,7 +242,7 @@ function ItemForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-      <div className="w-full max-w-lg rounded-t-2xl p-5 pb-8" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}>
+      <div className="w-full max-w-lg rounded-t-2xl p-5 pb-8" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", maxHeight: "90vh", overflowY: "auto" }}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-bold text-lg">{editingItem ? "Editar item" : "Novo item"}</h2>
           <button onClick={onClose} style={{ color: "var(--color-text-muted)" }}>
@@ -180,21 +250,47 @@ function ItemForm({
           </button>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          {/* File Upload / Preview */}
+          <div>
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Imagem do prato</label>
+            <div className="flex items-center gap-4">
+              {previewUrl && (
+                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0" style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setSelectedFile(file);
+                      setPreviewUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-orange)] file:text-white hover:file:opacity-80 transition-all cursor-pointer"
+                  style={{ color: "var(--color-text-muted)" }}
+                />
+              </div>
+            </div>
+          </div>
+
           {[
             { label: "Nome *", key: "name", placeholder: "Ex: X-Burguer Especial" },
             { label: "Descrição", key: "description", placeholder: "Ingredientes, modo de preparo..." },
             { label: "Categoria", key: "category", placeholder: "Ex: Lanches, Bebidas, Sobremesas" },
-            { label: "URL da imagem", key: "imageUrl", placeholder: "https://..." },
           ].map(({ label, key, placeholder }) => (
             <div key={key}>
-              <label className="block text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>{label}</label>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>{label}</label>
               <input
                 type="text"
                 value={(form as any)[key]}
                 onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
                 placeholder={placeholder}
-                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
                 style={{
                   background: "var(--color-surface-2)",
                   border: "1px solid var(--color-border)",
@@ -207,14 +303,14 @@ function ItemForm({
           ))}
 
           <div>
-            <label className="block text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>Preço (R$) *</label>
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Preço (R$) *</label>
             <input
               type="number"
               value={form.price}
               onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))}
               min={0}
               step={0.5}
-              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
               style={{
                 background: "var(--color-surface-2)",
                 border: "1px solid var(--color-border)",
@@ -229,7 +325,7 @@ function ItemForm({
         <button
           onClick={handleSubmit}
           disabled={!form.name || !form.price || saving}
-          className="btn-orange w-full mt-5 flex items-center justify-center gap-2 disabled:opacity-40"
+          className="btn-orange w-full mt-6 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : editingItem ? "Salvar alterações" : "Adicionar ao cardápio"}
         </button>
