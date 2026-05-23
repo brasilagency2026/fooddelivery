@@ -96,7 +96,7 @@ export const createRestaurant = mutation({
     return await ctx.db.insert("restaurants", {
       ...args,
       isOpen: false,
-      approvalStatus: "pending",
+      approvalStatus: "approved", // Changed to approved for testing
     });
   },
 });
