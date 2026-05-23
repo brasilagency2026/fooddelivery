@@ -33,8 +33,6 @@ export default function AdminLoginPage() {
             },
           },
         }}
-        path="/admin/login"
-        fallbackRedirectUrl="/admin/dashboard"
       />
     </div>
   );
