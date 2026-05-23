@@ -49,21 +49,28 @@ export default function AdminSignUpPage() {
             <span className="gradient-text">vendas do seu</span><br/>
             restaurante.
           </h1>
-          <p className="text-lg mb-8 font-light" style={{ color: "var(--color-text-muted)" }}>
-            Junte-se a centenas de restaurantes no Food Pronto e alcance novos clientes todos os dias com nosso sistema de delivery simplificado.
-          </p>
-          
-          <div className="flex gap-6">
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">+40%</span>
-              <span className="text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>Mais pedidos</span>
-            </div>
-            <div className="w-px h-12" style={{ background: "var(--color-border)" }}></div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">0</span>
-              <span className="text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>Taxa de adesão</span>
-            </div>
-          </div>
+          <ul className="text-base mb-8 font-light flex flex-col gap-3" style={{ color: "var(--color-text-muted)" }}>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Simples e rápido:</strong> Cadastro liberado na hora.</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Sem maquininha:</strong> Receba direto pelo Mercado Pago.</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Pagamento antecipado:</strong> Receba antes de entregar.</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Sem surpresas:</strong> Plano fixo de apenas R$ 150/mês.</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> 
+              <span><strong className="text-white font-medium">Zero risco:</strong> Os primeiros 30 dias são grátis para testar.</span>
+            </li>
+          </ul>
         </div>
       </div>
 
