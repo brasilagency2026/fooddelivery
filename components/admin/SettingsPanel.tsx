@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Save, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Save, Eye, EyeOff, Loader2, Copy, Download, Share2 } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 
 interface Restaurant {
   _id: string;
@@ -16,6 +17,8 @@ interface Restaurant {
   mercadoPagoAccessToken?: string;
   state?: string;
   city?: string;
+  citySlug?: string;
+  restaurantSlug?: string;
 }
 
 export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant & { imageUrl?: string }; ownerId: string }) {
@@ -275,6 +278,87 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant 
             {showToken ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
         </div>
+      </section>
+
+      {/* Share & QR Code */}
+      <section className="glass-card p-4">
+        <h2 className="font-semibold mb-4 text-sm uppercase tracking-wider flex items-center gap-2" style={{ color: "var(--color-text-muted)" }}>
+          <Share2 size={16} /> Link Direto e QR Code
+        </h2>
+        
+        {(() => {
+          const origin = typeof window !== "undefined" ? window.location.origin : "https://delivery.foodpronto.com.br";
+          const state = restaurant.state?.toLowerCase() || "sp";
+          const city = restaurant.citySlug || "cidade";
+          const slug = restaurant.restaurantSlug || restaurant._id;
+          const shareUrl = `${origin}/${state}/${city}/${slug}`;
+          
+          return (
+            <div className="flex flex-col gap-5">
+              <div>
+                <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Seu link de delivery</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={shareUrl}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none font-mono opacity-80"
+                    style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                  />
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareUrl);
+                      alert("Link copiado para a área de transferência!");
+                    }}
+                    className="px-4 rounded-xl flex items-center justify-center transition-opacity hover:opacity-80"
+                    style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                    title="Copiar Link"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+                <p className="text-xs mt-2" style={{ color: "var(--color-text-muted)" }}>
+                  Compartilhe este link no seu Instagram, WhatsApp ou Facebook para que seus clientes peçam direto no seu cardápio.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center justify-center p-4 rounded-xl" style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+                <div className="bg-white p-3 rounded-lg shadow-sm mb-3">
+                  <QRCodeCanvas 
+                    id="restaurant-qr-code"
+                    value={shareUrl} 
+                    size={150} 
+                    level="H"
+                    includeMargin={true}
+                    fgColor="#000000"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    const canvas = document.getElementById("restaurant-qr-code") as HTMLCanvasElement;
+                    if (canvas) {
+                      const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                      let downloadLink = document.createElement("a");
+                      downloadLink.href = pngUrl;
+                      downloadLink.download = `QR-Code-${restaurant.name.replace(/\s+/g, '-')}.png`;
+                      document.body.appendChild(downloadLink);
+                      downloadLink.click();
+                      document.body.removeChild(downloadLink);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 active:scale-95"
+                  style={{ background: "var(--color-orange)", color: "white" }}
+                >
+                  <Download size={16} />
+                  Baixar QR Code
+                </button>
+                <p className="text-xs mt-3 text-center px-4" style={{ color: "var(--color-text-muted)" }}>
+                  Imprima este QR Code e coloque nas suas mesas, embalagens ou panfletos!
+                </p>
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       <button
