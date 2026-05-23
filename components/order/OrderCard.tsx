@@ -88,10 +88,17 @@ export function OrderCard({ order }: { order: Order }) {
                 <Clock size={11} />
                 {timeAgo}
               </span>
-              <span className="flex items-center gap-1">
+              <a
+                href={`https://wa.me/${order.customerPhone.replace(/\D/g, "").startsWith("55") ? order.customerPhone.replace(/\D/g, "") : "55" + order.customerPhone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 transition-opacity hover:opacity-80"
+                style={{ color: "#25D366", fontWeight: 600 }}
+                title="Conversar no WhatsApp"
+              >
                 <Phone size={11} />
                 {order.customerPhone}
-              </span>
+              </a>
             </div>
           </div>
           <button onClick={() => setExpanded(!expanded)} style={{ color: "var(--color-text-muted)" }}>
