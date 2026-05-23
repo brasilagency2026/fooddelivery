@@ -79,8 +79,8 @@ export default function AdminSignUpPage() {
         {/* Mobile Header & Value Prop (only visible on small screens) */}
         <div className="mb-8 w-full max-w-sm lg:hidden">
           <div className="text-center mb-6">
-            <div className="text-4xl mb-3">🍔</div>
-            <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto</h1>
+            <div className="text-4xl mb-3">🛵</div>
+            <h1 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'DM Sans', sans-serif" }}>Food Pronto Delivery</h1>
             <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
               Portal do Parceiro
             </p>
