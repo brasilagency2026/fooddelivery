@@ -39,6 +39,14 @@ export const addMenuItem = mutation({
     imageUrl: v.optional(v.string()),
     storageId: v.optional(v.id("_storage")),
     category: v.optional(v.string()),
+    variations: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          price: v.number(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     let finalImageUrl = args.imageUrl;
@@ -56,6 +64,7 @@ export const addMenuItem = mutation({
       price: args.price,
       imageUrl: finalImageUrl,
       category: args.category,
+      variations: args.variations,
       isAvailable: true,
     });
   },
@@ -72,6 +81,14 @@ export const updateMenuItem = mutation({
     storageId: v.optional(v.id("_storage")),
     isAvailable: v.optional(v.boolean()),
     category: v.optional(v.string()),
+    variations: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          price: v.number(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     const { menuItemId, storageId, ...updates } = args;

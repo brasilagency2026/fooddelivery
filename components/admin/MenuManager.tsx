@@ -14,6 +14,7 @@ interface MenuItem {
   imageUrl?: string;
   isAvailable: boolean;
   category?: string;
+  variations?: { name: string; price: number }[];
 }
 
 export function MenuManager({ restaurantId }: { restaurantId: Id<"restaurants"> }) {
@@ -107,9 +108,18 @@ export function MenuManager({ restaurantId }: { restaurantId: Id<"restaurants"> 
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{item.name}</p>
                     <p className="text-xs truncate" style={{ color: "var(--color-text-muted)" }}>{item.description}</p>
-                    <p className="text-sm font-bold mt-0.5" style={{ color: "var(--color-orange)" }}>
-                      R$ {item.price.toFixed(2)}
-                    </p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <p className="text-sm font-bold" style={{ color: "var(--color-orange)" }}>
+                        {item.variations && item.variations.length > 0 
+                          ? `A partir de R$ ${Math.min(...item.variations.map((v: any) => v.price)).toFixed(2)}`
+                          : `R$ ${item.price.toFixed(2)}`}
+                      </p>
+                      {item.variations && item.variations.length > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(249, 115, 22, 0.1)", color: "var(--color-orange)" }}>
+                          {item.variations.length} variações
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={() => handleToggleAvailable(item)} style={{ color: item.isAvailable ? "#22c55e" : "var(--color-text-muted)" }}>
@@ -154,6 +164,7 @@ function ItemForm({
     category: editingItem?.category || "",
   });
   
+  const [variations, setVariations] = useState<{name: string; price: number}[]>(editingItem?.variations || []);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(editingItem?.imageUrl || null);
   const [saving, setSaving] = useState(false);
@@ -200,7 +211,11 @@ function ItemForm({
   }
 
   async function handleSubmit() {
-    if (!form.name || !form.price) return;
+    if (!form.name || (!form.price && variations.length === 0)) return;
+    
+    // Clean up empty variations
+    const cleanVariations = variations.filter(v => v.name.trim() !== "");
+    
     setSaving(true);
     try {
       let storageId: Id<"_storage"> | undefined;
@@ -227,10 +242,10 @@ function ItemForm({
       await onSave({
         name: form.name,
         description: form.description,
-        price: Number(form.price),
+        price: cleanVariations.length > 0 ? cleanVariations[0].price : Number(form.price),
         category: form.category || undefined,
+        variations: cleanVariations.length > 0 ? cleanVariations : undefined,
         storageId: storageId,
-        // If no new file was selected, keep the old imageUrl. Otherwise, the backend will resolve the new storageId.
         imageUrl: !selectedFile ? editingItem?.imageUrl : undefined, 
       });
     } catch (e: any) {
@@ -302,29 +317,92 @@ function ItemForm({
             </div>
           ))}
 
-          <div>
-            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Preço (R$) *</label>
-            <input
-              type="number"
-              value={form.price}
-              onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))}
-              min={0}
-              step={0.5}
-              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-              style={{
-                background: "var(--color-surface-2)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text)",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
-              onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
-            />
+          {/* Variações */}
+          <div className="pt-2 border-t border-dashed" style={{ borderColor: "var(--color-border)" }}>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>Variações (Tamanhos/Opções)</label>
+              <button 
+                onClick={() => setVariations([...variations, { name: "", price: 0 }])}
+                className="text-xs px-2 py-1 rounded flex items-center gap-1 font-medium transition-colors"
+                style={{ background: "rgba(249, 115, 22, 0.1)", color: "var(--color-orange)" }}
+              >
+                <Plus size={12} /> Adicionar
+              </button>
+            </div>
+            
+            {variations.length > 0 && (
+              <div className="flex flex-col gap-2 mb-3">
+                {variations.map((v, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Ex: Pequena" 
+                      value={v.name}
+                      onChange={(e) => {
+                        const newVars = [...variations];
+                        newVars[idx].name = e.target.value;
+                        setVariations(newVars);
+                      }}
+                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none transition-all"
+                      style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                      onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                      onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+                    />
+                    <input 
+                      type="number" 
+                      placeholder="Preço" 
+                      value={v.price}
+                      min={0}
+                      step={0.5}
+                      onChange={(e) => {
+                        const newVars = [...variations];
+                        newVars[idx].price = Number(e.target.value);
+                        setVariations(newVars);
+                      }}
+                      className="w-24 px-3 py-2 rounded-lg text-sm outline-none transition-all"
+                      style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                      onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                      onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+                    />
+                    <button 
+                      onClick={() => setVariations(variations.filter((_, i) => i !== idx))}
+                      style={{ color: "#ef4444" }}
+                      className="p-2 opacity-70 hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Preço Fixo (só mostra se não houver variações) */}
+          {variations.length === 0 && (
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Preço Fixo (R$) *</label>
+              <input
+                type="number"
+                value={form.price}
+                onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))}
+                min={0}
+                step={0.5}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  background: "var(--color-surface-2)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text)",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+            </div>
+          )}
         </div>
 
         <button
           onClick={handleSubmit}
-          disabled={!form.name || !form.price || saving}
+          disabled={!form.name || (!form.price && variations.length === 0) || saving}
           className="btn-orange w-full mt-6 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : editingItem ? "Salvar alterações" : "Adicionar ao cardápio"}

@@ -14,6 +14,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  variationName?: string;
   notes?: string;
 }
 
@@ -185,6 +186,7 @@ export default function CheckoutPage() {
         items: cart.map((item) => ({
           menuItemId: item.menuItemId as Id<"menuItems">,
           name: item.name,
+          variationName: item.variationName,
           quantity: item.quantity,
           price: item.price,
           notes: item.notes,
@@ -251,12 +253,17 @@ export default function CheckoutPage() {
             Resumo do Pedido
           </h2>
           <div className="flex flex-col gap-2">
-            {cart.map((item) => (
-              <div key={item.menuItemId} className="flex justify-between text-sm">
-                <span style={{ color: "var(--color-text-muted)" }}>
-                  {item.quantity}x {item.name}
+            {cart.map((item, idx) => (
+              <div key={idx} className="flex justify-between text-sm mb-2">
+                <span className="flex-1 pr-2" style={{ color: "var(--color-text-muted)" }}>
+                  <span className="font-medium mr-1">{item.quantity}x</span> {item.name}
+                  {item.variationName && (
+                    <span className="block text-[11px] mt-0.5" style={{ color: "var(--color-orange)" }}>
+                      Tamanho: {item.variationName}
+                    </span>
+                  )}
                 </span>
-                <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                <span className="whitespace-nowrap">R$ {(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>

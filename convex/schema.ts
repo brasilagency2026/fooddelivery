@@ -25,10 +25,18 @@ export default defineSchema({
     restaurantId: v.id("restaurants"),
     name: v.string(),
     description: v.string(),
-    price: v.number(),
+    price: v.number(), // base price
     imageUrl: v.optional(v.string()),
     isAvailable: v.boolean(),
     category: v.optional(v.string()),
+    variations: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          price: v.number(),
+        })
+      )
+    ),
   }).index("by_restaurant", ["restaurantId"]),
 
   orders: defineTable({
@@ -49,6 +57,7 @@ export default defineSchema({
       v.object({
         menuItemId: v.id("menuItems"),
         name: v.string(),
+        variationName: v.optional(v.string()),
         quantity: v.number(),
         price: v.number(),
         notes: v.optional(v.string()),

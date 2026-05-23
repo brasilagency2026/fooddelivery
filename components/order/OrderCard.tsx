@@ -32,7 +32,7 @@ interface Order {
     city: string;
     reference?: string;
   };
-  items: Array<{ name: string; quantity: number; price: number; notes?: string }>;
+  items: Array<{ name: string; quantity: number; price: number; notes?: string; variationName?: string }>;
   totalAmount: number;
   deliveryFee: number;
   status: string;
@@ -116,12 +116,17 @@ export function OrderCard({ order }: { order: Order }) {
         <div className="px-4 pb-4 border-t" style={{ borderColor: "var(--color-border)" }}>
           <div className="pt-3 flex flex-col gap-1.5">
             {order.items.map((item, i) => (
-              <div key={i} className="flex justify-between text-sm">
-                <span style={{ color: "var(--color-text-muted)" }}>
-                  {item.quantity}x {item.name}
-                  {item.notes && <span className="text-xs ml-1 italic">({item.notes})</span>}
+              <div key={i} className="flex justify-between text-sm mb-1">
+                <span className="flex-1 pr-2" style={{ color: "var(--color-text-muted)" }}>
+                  <span className="font-medium mr-1">{item.quantity}x</span> {item.name}
+                  {item.variationName && (
+                    <span className="block text-[11px] mt-0.5 font-medium" style={{ color: "var(--color-orange)" }}>
+                      Tamanho: {item.variationName}
+                    </span>
+                  )}
+                  {item.notes && <span className="block text-xs mt-0.5 italic">({item.notes})</span>}
                 </span>
-                <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                <span className="whitespace-nowrap">R$ {(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t mt-2 pt-2 flex justify-between font-bold text-sm" style={{ borderColor: "var(--color-border)" }}>

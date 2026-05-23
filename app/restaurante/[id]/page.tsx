@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { ArrowLeft, Clock, MapPin, ShoppingCart, Plus, Minus, X } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, ShoppingCart, Plus, Minus, X, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -13,13 +13,14 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  variationName?: string;
   notes?: string;
 }
 
 export default function RestaurantePage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [showCart, setShowCart] = useState(false);
+  const [variationModalItem, setVariationModalItem] = useState<any | null>(null);
 
   const restaurant = useQuery(api.restaurants.getRestaurant, {
     restaurantId: params.id as Id<"restaurants">,
@@ -29,27 +30,33 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
     restaurantId: params.id as Id<"restaurants">,
   });
 
-  function addToCart(item: { _id: string; name: string; price: number }) {
+  function addToCart(item: any, variationName?: string, priceOverride?: number) {
     setCart((prev) => {
-      const existing = prev.find((c) => c.menuItemId === item._id);
+      const existing = prev.find((c) => c.menuItemId === item._id && c.variationName === variationName);
       if (existing) {
         return prev.map((c) =>
-          c.menuItemId === item._id ? { ...c, quantity: c.quantity + 1 } : c
+          c.menuItemId === item._id && c.variationName === variationName ? { ...c, quantity: c.quantity + 1 } : c
         );
       }
-      return [...prev, { menuItemId: item._id, name: item.name, price: item.price, quantity: 1 }];
+      return [...prev, { 
+        menuItemId: item._id, 
+        name: item.name, 
+        price: priceOverride ?? item.price, 
+        quantity: 1,
+        variationName
+      }];
     });
   }
 
-  function removeFromCart(menuItemId: string) {
+  function removeFromCart(menuItemId: string, variationName?: string) {
     setCart((prev) => {
-      const existing = prev.find((c) => c.menuItemId === menuItemId);
+      const existing = prev.find((c) => c.menuItemId === menuItemId && c.variationName === variationName);
       if (existing && existing.quantity > 1) {
         return prev.map((c) =>
-          c.menuItemId === menuItemId ? { ...c, quantity: c.quantity - 1 } : c
+          c.menuItemId === menuItemId && c.variationName === variationName ? { ...c, quantity: c.quantity - 1 } : c
         );
       }
-      return prev.filter((c) => c.menuItemId !== menuItemId);
+      return prev.filter((c) => !(c.menuItemId === menuItemId && c.variationName === variationName));
     });
   }
 
@@ -57,13 +64,11 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
-    // Store cart in sessionStorage before navigating
     sessionStorage.setItem("cart", JSON.stringify(cart));
     sessionStorage.setItem("restaurantId", params.id);
     router.push("/checkout");
   };
 
-  // Group menu items by category
   const categories = menuItems
     ? [...new Set(menuItems.map((i: any) => i.category || "Cardápio"))]
     : [];
@@ -138,7 +143,17 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
               {menuItems
                 ?.filter((item: any) => (item.category || "Cardápio") === category)
                 .map((item: any) => {
-                  const cartItem = cart.find((c) => c.menuItemId === item._id);
+                  const cartItemsForItem = cart.filter((c) => c.menuItemId === item._id);
+                  const totalQty = cartItemsForItem.reduce((sum, c) => sum + c.quantity, 0);
+                  const hasVariations = item.variations && item.variations.length > 0;
+                  
+                  // Display price
+                  let displayPrice = `R$ ${item.price.toFixed(2)}`;
+                  if (hasVariations) {
+                    const minPrice = Math.min(...item.variations.map((v: any) => v.price));
+                    displayPrice = `A partir de R$ ${minPrice.toFixed(2)}`;
+                  }
+
                   return (
                     <div
                       key={item._id}
@@ -157,41 +172,57 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
                         <p className="text-xs mb-2 line-clamp-2" style={{ color: "var(--color-text-muted)" }}>
                           {item.description}
                         </p>
-                        <span className="font-bold" style={{ color: "var(--color-orange)" }}>
-                          R$ {item.price.toFixed(2)}
+                        <span className="font-bold text-xs" style={{ color: "var(--color-orange)" }}>
+                          {displayPrice}
                         </span>
                       </div>
 
-                      {/* Quantity control */}
-                      <div className="flex-shrink-0">
-                        {cartItem ? (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => removeFromCart(item._id)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center"
-                              style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <span className="font-bold w-5 text-center text-sm">{cartItem.quantity}</span>
+                      {/* Quantity control / Choose button */}
+                      <div className="flex-shrink-0 flex items-center">
+                        {hasVariations ? (
+                          <button
+                            onClick={() => setVariationModalItem(item)}
+                            disabled={!restaurant.isOpen}
+                            className="text-xs px-4 py-2 rounded-full font-semibold relative disabled:opacity-50"
+                            style={{ background: "var(--color-orange)", color: "white" }}
+                          >
+                            Escolher
+                            {totalQty > 0 && (
+                              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white text-black flex items-center justify-center text-[10px] font-bold">
+                                {totalQty}
+                              </span>
+                            )}
+                          </button>
+                        ) : (
+                          totalQty > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => removeFromCart(item._id)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center"
+                                style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span className="font-bold w-5 text-center text-sm">{totalQty}</span>
+                              <button
+                                onClick={() => addToCart(item)}
+                                disabled={!restaurant.isOpen}
+                                className="w-8 h-8 rounded-full flex items-center justify-center"
+                                style={{ background: "var(--color-orange)" }}
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          ) : (
                             <button
                               onClick={() => addToCart(item)}
                               disabled={!restaurant.isOpen}
-                              className="w-8 h-8 rounded-full flex items-center justify-center"
+                              className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-40"
                               style={{ background: "var(--color-orange)" }}
                             >
                               <Plus size={14} />
                             </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => addToCart(item)}
-                            disabled={!restaurant.isOpen}
-                            className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-40"
-                            style={{ background: "var(--color-orange)" }}
-                          >
-                            <Plus size={14} />
-                          </button>
+                          )
                         )}
                       </div>
                     </div>
@@ -202,9 +233,79 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
         ))}
       </main>
 
+      {/* Variation Modal */}
+      {variationModalItem && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="w-full max-w-xl rounded-t-3xl p-5 pb-8 animate-slide-up" style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)", maxHeight: "85vh", overflowY: "auto" }}>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-bold text-lg">{variationModalItem.name}</h3>
+                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Escolha uma variação</p>
+              </div>
+              <button onClick={() => setVariationModalItem(null)} className="p-2 rounded-full" style={{ background: "var(--color-surface-2)" }}>
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-3 mt-6">
+              {variationModalItem.variations.map((v: any, idx: number) => {
+                const qty = cart.find(c => c.menuItemId === variationModalItem._id && c.variationName === v.name)?.quantity || 0;
+                
+                return (
+                  <div key={idx} className="flex items-center justify-between p-4 rounded-2xl" style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+                    <div>
+                      <p className="font-semibold text-sm">{v.name}</p>
+                      <p className="text-sm font-bold mt-1" style={{ color: "var(--color-orange)" }}>R$ {v.price.toFixed(2)}</p>
+                    </div>
+                    
+                    {qty > 0 ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => removeFromCart(variationModalItem._id, v.name)}
+                          className="w-9 h-9 rounded-full flex items-center justify-center"
+                          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="font-bold w-4 text-center">{qty}</span>
+                        <button
+                          onClick={() => addToCart(variationModalItem, v.name, v.price)}
+                          className="w-9 h-9 rounded-full flex items-center justify-center"
+                          style={{ background: "var(--color-orange)", color: "white" }}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(variationModalItem, v.name, v.price)}
+                        className="px-4 py-2 rounded-full text-xs font-semibold"
+                        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+                      >
+                        Adicionar
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-8">
+              <button 
+                onClick={() => setVariationModalItem(null)}
+                className="w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2"
+                style={{ background: "var(--color-orange)", color: "white" }}
+              >
+                Concluir <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating cart button */}
-      {cartCount > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 max-w-xl mx-auto z-50">
+      {cartCount > 0 && !variationModalItem && (
+        <div className="fixed bottom-6 left-4 right-4 max-w-xl mx-auto z-40 animate-slide-up">
           <button
             onClick={handleCheckout}
             className="btn-orange w-full flex items-center justify-between"
