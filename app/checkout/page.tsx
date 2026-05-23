@@ -87,7 +87,10 @@ export default function CheckoutPage() {
   }, [mapsLoaded]);
 
   const handleLocateMe = () => {
-    if (!mapsLoaded || !window.google) return;
+    if (!mapsLoaded || !window.google) {
+      alert("Os mapas ainda estão carregando. Por favor, aguarde alguns segundos e tente novamente.");
+      return;
+    }
     if (!navigator.geolocation) {
       alert("Geolocalização não é suportada neste navegador.");
       return;
@@ -114,7 +117,7 @@ export default function CheckoutPage() {
               const type = component.types[0];
               if (type === "route") street = component.long_name;
               if (type === "street_number") number = component.long_name;
-              if (type === "sublocality_level_1" || type === "sublocality") neighborhood = component.long_name;
+              if (type === "sublocality_level_1" || type === "sublocality" || type === "neighborhood") neighborhood = component.long_name;
               if (type === "administrative_area_level_2" || type === "locality") city = component.long_name;
             }
             
@@ -126,15 +129,15 @@ export default function CheckoutPage() {
               city: city || prev.city,
             }));
           } else {
-            alert("Não foi possível identificar o endereço exato.");
+            alert(`Não foi possível identificar o endereço exato. Status: ${status}`);
           }
         });
       },
       (err) => {
         setLocating(false);
-        alert("Erro ao obter sua localização. Verifique as permissões do navegador.");
+        alert(`Erro ao obter localização: ${err.message}. Verifique as permissões do seu navegador (ex: bloqueadores, privacidade).`);
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -232,7 +235,7 @@ export default function CheckoutPage() {
       {/* Script Google Maps */}
       <Script 
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`} 
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={() => setMapsLoaded(true)}
       />
 
