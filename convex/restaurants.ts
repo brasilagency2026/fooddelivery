@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 function generateSlug(text: string): string {
   return text
@@ -95,7 +96,7 @@ export const getRestaurantBySlug = query({
       
     if (!restaurant) {
       try {
-        restaurant = await ctx.db.get(args.restaurantSlug as any);
+        restaurant = await ctx.db.get(args.restaurantSlug as Id<"restaurants">);
       } catch (e) {
         // Not a valid ID, ignore
       }
