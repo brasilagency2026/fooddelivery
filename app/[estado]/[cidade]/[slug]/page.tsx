@@ -20,6 +20,7 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [variationModalItem, setVariationModalItem] = useState<any | null>(null);
+  const [detailsModalItem, setDetailsModalItem] = useState<any | null>(null);
 
   const restaurant = useQuery(api.restaurants.getRestaurantBySlug, {
     state: params.estado,
@@ -170,7 +171,8 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
                   return (
                     <div
                       key={item._id}
-                      className="glass-card p-4 flex gap-3 items-center"
+                      onClick={() => setDetailsModalItem(item)}
+                      className="glass-card p-4 flex gap-3 items-center cursor-pointer transition-transform active:scale-[0.98]"
                     >
                       {/* Item image */}
                       {item.imageUrl && (
@@ -194,7 +196,10 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
                       <div className="flex-shrink-0 flex items-center">
                         {hasVariations ? (
                           <button
-                            onClick={() => setVariationModalItem(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVariationModalItem(item);
+                            }}
                             disabled={!restaurant.isOpen}
                             className="text-xs px-4 py-2 rounded-full font-semibold relative disabled:opacity-50"
                             style={{ background: "var(--color-orange)", color: "white" }}
@@ -210,7 +215,10 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
                           totalQty > 0 ? (
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => removeFromCart(item._id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeFromCart(item._id);
+                                }}
                                 className="w-8 h-8 rounded-full flex items-center justify-center"
                                 style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}
                               >
@@ -218,7 +226,10 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
                               </button>
                               <span className="font-bold w-5 text-center text-sm">{totalQty}</span>
                               <button
-                                onClick={() => addToCart(item)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart(item);
+                                }}
                                 disabled={!restaurant.isOpen}
                                 className="w-8 h-8 rounded-full flex items-center justify-center"
                                 style={{ background: "var(--color-orange)" }}
@@ -228,7 +239,10 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
                             </div>
                           ) : (
                             <button
-                              onClick={() => addToCart(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(item);
+                              }}
                               disabled={!restaurant.isOpen}
                               className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-40"
                               style={{ background: "var(--color-orange)" }}
@@ -245,6 +259,65 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
           </div>
         ))}
       </main>
+
+      {/* Item Details Modal */}
+      {detailsModalItem && !variationModalItem && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }} onClick={() => setDetailsModalItem(null)}>
+          <div className="w-full max-w-xl sm:rounded-3xl rounded-t-3xl p-5 pb-8 sm:pb-5 animate-slide-up relative" style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)", maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setDetailsModalItem(null)} className="absolute top-4 right-4 p-2 rounded-full z-10" style={{ background: "rgba(10,10,10,0.5)", color: "white", backdropFilter: "blur(4px)" }}>
+              <X size={18} />
+            </button>
+            
+            {detailsModalItem.imageUrl && (
+              <div className="w-full h-56 sm:h-72 rounded-2xl overflow-hidden mb-5" style={{ background: "var(--color-surface-2)" }}>
+                <img src={detailsModalItem.imageUrl} alt={detailsModalItem.name} className="w-full h-full object-cover" />
+              </div>
+            )}
+            
+            <div className={!detailsModalItem.imageUrl ? "mt-4" : ""}>
+              <h3 className="font-bold text-2xl mb-2">{detailsModalItem.name}</h3>
+              <p className="text-sm leading-relaxed mb-6 whitespace-pre-wrap" style={{ color: "var(--color-text-muted)" }}>
+                {detailsModalItem.description}
+              </p>
+              
+              <div className="flex items-center justify-between pt-5 border-t" style={{ borderColor: "var(--color-border)" }}>
+                <span className="font-bold text-xl" style={{ color: "var(--color-orange)" }}>
+                  {detailsModalItem.variations?.length > 0 
+                    ? `A partir de R$ ${Math.min(...detailsModalItem.variations.map((v: any) => v.price)).toFixed(2)}`
+                    : `R$ ${detailsModalItem.price.toFixed(2)}`
+                  }
+                </span>
+                
+                {detailsModalItem.variations?.length > 0 ? (
+                  <button
+                    onClick={() => {
+                      setVariationModalItem(detailsModalItem);
+                      setDetailsModalItem(null);
+                    }}
+                    disabled={!restaurant.isOpen}
+                    className="px-6 py-3 rounded-full font-bold disabled:opacity-50"
+                    style={{ background: "var(--color-orange)", color: "white" }}
+                  >
+                    Escolher
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      addToCart(detailsModalItem);
+                      setDetailsModalItem(null);
+                    }}
+                    disabled={!restaurant.isOpen}
+                    className="px-6 py-3 rounded-full font-bold flex items-center gap-2 disabled:opacity-50"
+                    style={{ background: "var(--color-orange)", color: "white" }}
+                  >
+                    <Plus size={18} /> Adicionar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Variation Modal */}
       {variationModalItem && (
