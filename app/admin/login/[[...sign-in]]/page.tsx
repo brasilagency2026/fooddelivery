@@ -79,10 +79,6 @@ export default function AdminLoginPage() {
         </div>
 
         <SignIn
-          routing="path"
-          path="/admin/login"
-          signUpUrl="/admin/login"
-          fallbackRedirectUrl="/admin/dashboard"
           appearance={{
             layout: {
               socialButtonsPlacement: "bottom",
