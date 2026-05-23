@@ -53,18 +53,6 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
     order ? { restaurantId: order.restaurantId } : "skip"
   );
 
-  if (!order) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "var(--color-orange)", borderTopColor: "transparent" }} />
-      </div>
-    );
-  }
-
-  const isCanceled = order.status === "canceled";
-  const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
-  const isDelivered = order.status === "delivered";
-
   const { playSound } = useAudioNotification();
   const prevStatusRef = useRef<string | null>(null);
 
@@ -76,6 +64,18 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
       prevStatusRef.current = order.status;
     }
   }, [order?.status, playSound]);
+
+  if (!order) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "var(--color-orange)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+
+  const isCanceled = order.status === "canceled";
+  const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
+  const isDelivered = order.status === "delivered";
 
   return (
     <div className="min-h-dvh pb-10" style={{ background: "var(--color-bg)" }}>

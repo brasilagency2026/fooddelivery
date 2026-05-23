@@ -19,6 +19,9 @@ export default function AdminDashboard() {
   const { user } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>("orders");
 
+  const { playSound } = useAudioNotification();
+  const prevPendingCountRef = useRef<number>(0);
+
   const restaurant = useQuery(
     api.restaurants.getMyRestaurant,
     user ? { ownerId: user.id } : "skip"
@@ -28,6 +31,15 @@ export default function AdminDashboard() {
     api.orders.getActiveOrders,
     restaurant ? { restaurantId: restaurant._id } : "skip"
   );
+
+  const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
+
+  useEffect(() => {
+    if (pendingCount > prevPendingCountRef.current) {
+      playSound("newOrder");
+    }
+    prevPendingCountRef.current = pendingCount;
+  }, [pendingCount, playSound]);
 
   const toggleOpen = useMutation(api.restaurants.toggleRestaurantOpen);
 
@@ -66,18 +78,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
-  
-  const { playSound } = useAudioNotification();
-  const prevPendingCountRef = useRef<number>(pendingCount);
-
-  useEffect(() => {
-    if (pendingCount > prevPendingCountRef.current) {
-      playSound("newOrder");
-    }
-    prevPendingCountRef.current = pendingCount;
-  }, [pendingCount, playSound]);
 
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--color-bg)" }}>
