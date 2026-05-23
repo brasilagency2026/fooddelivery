@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { useAction } from "convex/react";
+import { useState, useEffect, useRef } from "react";
+import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { ArrowLeft, MapPin, User, Phone, FileText, CreditCard, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, User, Phone, FileText, CreditCard, Loader2, Navigation } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 
 interface CartItem {
   menuItemId: string;
@@ -23,6 +23,11 @@ export default function CheckoutPage() {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Google Maps State
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const addressInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     customerName: "",
@@ -42,6 +47,95 @@ export default function CheckoutPage() {
     if (savedRestaurantId) setRestaurantId(savedRestaurantId);
     else router.push("/");
   }, []);
+
+  // Initialize Autocomplete once maps is loaded
+  useEffect(() => {
+    if (!mapsLoaded || !addressInputRef.current || !window.google) return;
+
+    const autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
+      types: ["address"],
+      componentRestrictions: { country: "BR" }, 
+      fields: ["address_components", "geometry", "formatted_address"],
+    });
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) return;
+      
+      let street = "";
+      let number = "";
+      let neighborhood = "";
+      let city = "";
+      
+      for (const component of place.address_components || []) {
+        const type = component.types[0];
+        if (type === "route") street = component.long_name;
+        if (type === "street_number") number = component.long_name;
+        if (type === "sublocality_level_1" || type === "sublocality") neighborhood = component.long_name;
+        if (type === "administrative_area_level_2" || type === "locality") city = component.long_name;
+      }
+      
+      setForm(prev => ({
+        ...prev,
+        street: street || place.formatted_address?.split(',')[0] || prev.street,
+        number: number || prev.number,
+        neighborhood: neighborhood || prev.neighborhood,
+        city: city || prev.city,
+      }));
+    });
+  }, [mapsLoaded]);
+
+  const handleLocateMe = () => {
+    if (!mapsLoaded || !window.google) return;
+    if (!navigator.geolocation) {
+      alert("Geolocalização não é suportada neste navegador.");
+      return;
+    }
+
+    setLocating(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const geocoder = new window.google.maps.Geocoder();
+        const latlng = { lat: position.coords.latitude, lng: position.coords.longitude };
+        
+        geocoder.geocode({ location: latlng }, (results, status) => {
+          setLocating(false);
+          if (status === "OK" && results && results[0]) {
+            const place = results[0];
+            
+            let street = "";
+            let number = "";
+            let neighborhood = "";
+            let city = "";
+            
+            for (const component of place.address_components || []) {
+              const type = component.types[0];
+              if (type === "route") street = component.long_name;
+              if (type === "street_number") number = component.long_name;
+              if (type === "sublocality_level_1" || type === "sublocality") neighborhood = component.long_name;
+              if (type === "administrative_area_level_2" || type === "locality") city = component.long_name;
+            }
+            
+            setForm(prev => ({
+              ...prev,
+              street: street || prev.street,
+              number: number || prev.number,
+              neighborhood: neighborhood || prev.neighborhood,
+              city: city || prev.city,
+            }));
+          } else {
+            alert("Não foi possível identificar o endereço exato.");
+          }
+        });
+      },
+      (err) => {
+        setLocating(false);
+        alert("Erro ao obter sua localização. Verifique as permissões do navegador.");
+      },
+      { enableHighAccuracy: true }
+    );
+  };
 
   const restaurant = useQuery(
     api.restaurants.getRestaurant,
@@ -76,7 +170,6 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      // Create the order
       const orderId = await createOrder({
         restaurantId: restaurantId as Id<"restaurants">,
         customerName: form.customerName,
@@ -100,7 +193,6 @@ export default function CheckoutPage() {
         deliveryFee,
       });
 
-      // Create Mercado Pago preference
       const baseUrl = window.location.origin;
       const payment = await createPayment({
         orderId,
@@ -117,11 +209,9 @@ export default function CheckoutPage() {
         },
       });
 
-      // Clear cart and redirect to Mercado Pago
       sessionStorage.removeItem("cart");
       sessionStorage.removeItem("restaurantId");
 
-      // Use sandbox URL in development, init_point in production
       const isDev = process.env.NODE_ENV === "development";
       window.location.href = isDev ? payment.sandboxInitPoint : payment.initPoint;
     } catch (err: any) {
@@ -134,6 +224,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-dvh pb-32" style={{ background: "var(--color-bg)" }}>
+      {/* Script Google Maps */}
+      <Script 
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`} 
+        strategy="lazyOnload"
+        onLoad={() => setMapsLoaded(true)}
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-40 px-4 py-4" style={{ background: "rgba(10,10,10,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--color-border)" }}>
         <div className="max-w-xl mx-auto flex items-center gap-3">
@@ -203,12 +300,45 @@ export default function CheckoutPage() {
 
         {/* Delivery address */}
         <section className="glass-card p-4">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <MapPin size={16} style={{ color: "var(--color-orange)" }} />
-            Endereço de entrega
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold flex items-center gap-2">
+              <MapPin size={16} style={{ color: "var(--color-orange)" }} />
+              Endereço de entrega
+            </h2>
+            <button 
+              onClick={handleLocateMe}
+              disabled={locating || !mapsLoaded}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all hover:opacity-80"
+              style={{ background: "rgba(255, 107, 53, 0.1)", color: "var(--color-orange)" }}
+            >
+              {locating ? <Loader2 size={14} className="animate-spin" /> : <Navigation size={14} />}
+              {locating ? "Localizando..." : "Usar minha localização"}
+            </button>
+          </div>
+          
           <div className="flex flex-col gap-3">
-            <InputField label="Rua / Avenida" value={form.street} onChange={(v) => updateForm("street", v)} placeholder="Rua das Flores" required />
+            {/* Campo especial Autocomplete */}
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>
+                Rua / Avenida <span style={{ color: "var(--color-orange)" }}>*</span>
+              </label>
+              <input
+                ref={addressInputRef}
+                type="text"
+                value={form.street}
+                onChange={(e) => updateForm("street", e.target.value)}
+                placeholder="Busque sua rua ou avenida..."
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  background: "var(--color-surface-2)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text)",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+            </div>
+            
             <div className="grid grid-cols-2 gap-3">
               <InputField label="Número" value={form.number} onChange={(v) => updateForm("number", v)} placeholder="123" required />
               <InputField label="Complemento" value={form.complement} onChange={(v) => updateForm("complement", v)} placeholder="Apto 4B" />
@@ -308,3 +438,4 @@ function InputField({
     </div>
   );
 }
+
