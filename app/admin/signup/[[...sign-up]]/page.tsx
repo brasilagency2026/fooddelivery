@@ -22,20 +22,21 @@ export default function AdminSignUpPage() {
 
       {/* Left panel - Image & Value Prop */}
       <div className="hidden lg:flex flex-1 relative flex-col justify-end p-12 overflow-hidden border-r" style={{ borderColor: "var(--color-border)" }}>
-        {/* Background Image */}
+        {/* Abstract Dark Background */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
+          className="absolute inset-0 z-0"
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=2874&auto=format&fit=crop')",
+            background: "radial-gradient(circle at right center, rgba(255, 107, 53, 0.15) 0%, rgba(10, 10, 10, 1) 60%)" 
           }}
         />
-        {/* Gradient Overlay */}
-        <div 
-          className="absolute inset-0 z-10"
-          style={{ 
-            background: "linear-gradient(to top, rgba(10,10,10,1) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.2) 100%)" 
-          }}
-        />
+        {/* Transparent Graphic Vector */}
+        <div className="absolute top-20 -right-20 z-0 opacity-30 w-[500px] h-[500px] pointer-events-none transition-transform duration-1000 hover:scale-105">
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/2950/2950664.png" 
+            alt="Delivery Scooter Graphic"
+            className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,107,53,0.3)]"
+          />
+        </div>
         
         {/* Content */}
         <div className="relative z-20 max-w-lg">
