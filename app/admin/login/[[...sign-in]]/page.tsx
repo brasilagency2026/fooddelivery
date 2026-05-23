@@ -79,6 +79,10 @@ export default function AdminLoginPage() {
         </div>
 
         <SignIn
+          routing="path"
+          path="/admin/login"
+          signUpUrl="/admin/login"
+          fallbackRedirectUrl="/admin/dashboard"
           appearance={{
             layout: {
               socialButtonsPlacement: "bottom",
@@ -113,18 +117,10 @@ export default function AdminLoginPage() {
                 fontSize: "1rem",
                 textTransform: "none",
                 fontWeight: "600",
-                transition: "all 0.2s",
-                "&:hover": {
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 10px 20px -10px var(--color-orange)",
-                }
               },
               socialButtonsBlockButton: {
                 border: "1px solid #2D2D2D",
                 background: "#161616",
-                "&:hover": {
-                  background: "#1F1F1F",
-                }
               }
             },
           }}
