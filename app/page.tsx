@@ -165,6 +165,20 @@ export default function HomePage() {
         )}
       </main>
 
+      {/* Footer */}
+      <footer className="w-full py-8 mt-auto border-t" style={{ borderColor: "var(--color-border)", background: "var(--color-surface)" }}>
+        <div className="max-w-xl mx-auto px-4 flex flex-col items-center justify-center gap-2">
+          <p className="text-xs font-semibold" style={{ color: "var(--color-text-muted)" }}>
+            © {new Date().getFullYear()} Food Pronto Delivery
+          </p>
+          <div className="flex items-center gap-4 text-xs mt-1">
+            <a href="/contato" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Contato</a>
+            <span style={{ color: "var(--color-border)" }}>•</span>
+            <a href="/admin/login" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Área do Restaurante</a>
+          </div>
+        </div>
+      </footer>
+
       {/* Floating Action Button for My Orders */}
       <MeusPedidosButton />
     </div>
