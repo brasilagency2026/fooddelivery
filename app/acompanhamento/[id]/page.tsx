@@ -6,6 +6,8 @@ import { Id } from "@/convex/_generated/dataModel";
 import { CheckCircle, Clock, ChefHat, Bike, XCircle, Home } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useAudioNotification } from "@/hooks/useAudioNotification";
+import { useEffect, useRef } from "react";
 
 const STATUS_STEPS = [
   {
@@ -62,6 +64,18 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
   const isCanceled = order.status === "canceled";
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
   const isDelivered = order.status === "delivered";
+
+  const { playSound } = useAudioNotification();
+  const prevStatusRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (order) {
+      if (prevStatusRef.current && prevStatusRef.current !== order.status && order.status !== "pending") {
+        playSound("statusChange");
+      }
+      prevStatusRef.current = order.status;
+    }
+  }, [order?.status, playSound]);
 
   return (
     <div className="min-h-dvh pb-10" style={{ background: "var(--color-bg)" }}>

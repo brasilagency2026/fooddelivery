@@ -10,6 +10,8 @@ import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { MenuManager } from "@/components/admin/MenuManager";
 import { RegisterRestaurant } from "@/components/admin/RegisterRestaurant";
 import { LayoutDashboard, UtensilsCrossed, Settings, Power } from "lucide-react";
+import { useAudioNotification } from "@/hooks/useAudioNotification";
+import { useEffect, useRef } from "react";
 
 type Tab = "orders" | "menu" | "settings";
 
@@ -66,6 +68,16 @@ export default function AdminDashboard() {
   }
 
   const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
+  
+  const { playSound } = useAudioNotification();
+  const prevPendingCountRef = useRef<number>(pendingCount);
+
+  useEffect(() => {
+    if (pendingCount > prevPendingCountRef.current) {
+      playSound("newOrder");
+    }
+    prevPendingCountRef.current = pendingCount;
+  }, [pendingCount, playSound]);
 
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--color-bg)" }}>
