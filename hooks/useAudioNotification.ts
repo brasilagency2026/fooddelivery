@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Tiny base64 encoded audio files to avoid external dependencies
 const SOUNDS = {
@@ -15,6 +15,7 @@ const SOUNDS = {
 // since real base64 MP3s are too large to embed easily.
 export function useAudioNotification() {
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
   useEffect(() => {
     // Initialize lazily to respect browser autoplay policies
@@ -22,11 +23,27 @@ export function useAudioNotification() {
       if (!audioCtxRef.current) {
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
+      if (audioCtxRef.current.state === "suspended") {
+        audioCtxRef.current.resume().then(() => setIsAudioUnlocked(true)).catch(() => {});
+      } else {
+        setIsAudioUnlocked(true);
+      }
     };
     
-    window.addEventListener("click", initAudio, { once: true });
+    window.addEventListener("click", initAudio);
     return () => window.removeEventListener("click", initAudio);
   }, []);
+
+  const unlockAudio = () => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume().then(() => setIsAudioUnlocked(true)).catch(() => {});
+    } else {
+      setIsAudioUnlocked(true);
+    }
+  };
 
   const playSound = (type: "newOrder" | "statusChange") => {
     try {
@@ -36,7 +53,7 @@ export function useAudioNotification() {
       
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") {
-        ctx.resume();
+        ctx.resume().then(() => setIsAudioUnlocked(true)).catch(() => {});
       }
 
       const oscillator = ctx.createOscillator();
@@ -82,5 +99,5 @@ export function useAudioNotification() {
     }
   };
 
-  return { playSound };
+  return { playSound, isAudioUnlocked, unlockAudio };
 }

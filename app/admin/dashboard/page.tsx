@@ -34,12 +34,17 @@ export default function AdminDashboard() {
 
   const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
 
+  const { playSound, isAudioUnlocked, unlockAudio } = useAudioNotification();
+  const prevPendingCountRef = useRef<number | null>(null);
+
   useEffect(() => {
-    if (pendingCount > prevPendingCountRef.current) {
-      playSound("newOrder");
+    if (activeOrders !== undefined) {
+      if (prevPendingCountRef.current !== null && pendingCount > prevPendingCountRef.current) {
+        playSound("newOrder");
+      }
+      prevPendingCountRef.current = pendingCount;
     }
-    prevPendingCountRef.current = pendingCount;
-  }, [pendingCount, playSound]);
+  }, [pendingCount, activeOrders, playSound]);
 
   const toggleOpen = useMutation(api.restaurants.toggleRestaurantOpen);
 
@@ -91,6 +96,16 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {!isAudioUnlocked && (
+              <button
+                onClick={unlockAudio}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold"
+                style={{ background: "rgba(234,179,8,0.15)", color: "#eab308", border: "1px solid rgba(234,179,8,0.4)" }}
+                title="Ativar notificações sonoras"
+              >
+                🔊 Som
+              </button>
+            )}
             {/* BIG toggle button */}
             <button
               onClick={handleToggle}
