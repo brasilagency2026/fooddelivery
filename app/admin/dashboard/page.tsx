@@ -19,8 +19,8 @@ export default function AdminDashboard() {
   const { user } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>("orders");
 
-  const { playSound } = useAudioNotification();
-  const prevPendingCountRef = useRef<number>(0);
+  const { playSound, isAudioUnlocked, unlockAudio } = useAudioNotification();
+  const prevPendingCountRef = useRef<number | null>(null);
 
   const restaurant = useQuery(
     api.restaurants.getMyRestaurant,
@@ -33,9 +33,6 @@ export default function AdminDashboard() {
   );
 
   const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
-
-  const { playSound, isAudioUnlocked, unlockAudio } = useAudioNotification();
-  const prevPendingCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (activeOrders !== undefined) {
