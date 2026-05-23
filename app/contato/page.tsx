@@ -62,7 +62,6 @@ export default function ContatoPage() {
               <h3 className="font-bold text-sm uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>Dados da Empresa</h3>
             </div>
             <div>
-              <p className="text-sm font-medium">Food Pronto Delivery</p>
               <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>CNPJ: 64.465.357/0001-28</p>
             </div>
           </div>
