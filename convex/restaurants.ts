@@ -212,8 +212,35 @@ export const updateRestaurantSettings = mutation({
       if (url) finalUpdates.imageUrl = url;
     }
     
-    if (city) finalUpdates.citySlug = generateSlug(city);
+    if (city) {
+      finalUpdates.city = city;
+      finalUpdates.citySlug = generateSlug(city);
+    }
     if (updates.state) finalUpdates.state = updates.state.toLowerCase();
+
+    // Generate restaurantSlug if it's missing from the database
+    if (!restaurant.restaurantSlug) {
+      const stateToUse = finalUpdates.state || restaurant.state || "sp";
+      const citySlugToUse = finalUpdates.citySlug || restaurant.citySlug || "cidade";
+      
+      const baseSlug = generateSlug(restaurant.name);
+      let newRestaurantSlug = baseSlug;
+      let counter = 1;
+      
+      while (true) {
+        const existing = await ctx.db
+          .query("restaurants")
+          .withIndex("by_slug", (q) => 
+            q.eq("state", stateToUse).eq("citySlug", citySlugToUse).eq("restaurantSlug", newRestaurantSlug)
+          )
+          .first();
+        
+        if (!existing || existing._id === restaurant._id) break;
+        newRestaurantSlug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      finalUpdates.restaurantSlug = newRestaurantSlug;
+    }
 
     const filteredUpdates = Object.fromEntries(
       Object.entries(finalUpdates).filter(([, v]) => v !== undefined)
