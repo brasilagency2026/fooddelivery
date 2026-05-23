@@ -15,6 +15,7 @@ const deliveryAddressValidator = v.object({
 const orderItemValidator = v.object({
   menuItemId: v.id("menuItems"),
   name: v.string(),
+  variationName: v.optional(v.string()),
   quantity: v.number(),
   price: v.number(),
   notes: v.optional(v.string()),
