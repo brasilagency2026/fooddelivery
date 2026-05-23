@@ -24,7 +24,7 @@ export default function RootLayout({
         <ClerkProvider
           localization={ptBR as any}
           signInUrl="/admin/login"
-          signUpUrl="/admin/login"
+          signUpUrl="/admin/signup"
           signInFallbackRedirectUrl="/admin/dashboard"
           signUpFallbackRedirectUrl="/admin/dashboard"
         >
