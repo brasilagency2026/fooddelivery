@@ -25,7 +25,7 @@ export const createPaymentPreference = action({
       pending: v.string(),
     }),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     // Get the restaurant's MP access token
     const restaurant = await ctx.runQuery(api.restaurants.getRestaurant, {
       restaurantId: args.restaurantId,
@@ -116,7 +116,7 @@ export const verifyPayment = action({
     orderId: v.id("orders"),
     restaurantId: v.id("restaurants"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<any> => {
     const restaurant = await ctx.runQuery(api.restaurants.getRestaurant, {
       restaurantId: args.restaurantId,
     });

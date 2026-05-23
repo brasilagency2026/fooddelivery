@@ -50,7 +50,7 @@ export default function HomePage() {
     );
   }
 
-  const filteredRestaurants = restaurants?.filter((r) =>
+  const filteredRestaurants = restaurants?.filter((r: any) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.cuisine?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -141,7 +141,7 @@ export default function HomePage() {
 
             {/* Restaurant cards */}
             <div className="flex flex-col gap-4">
-              {filteredRestaurants?.map((restaurant, i) => (
+              {filteredRestaurants?.map((restaurant: any, i: number) => (
                 <div
                   key={restaurant._id}
                   className="animate-slide-up"

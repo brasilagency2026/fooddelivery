@@ -65,7 +65,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const pendingCount = activeOrders?.filter((o) => o.status === "pending").length ?? 0;
+  const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
 
   return (
     <div className="min-h-dvh flex flex-col" style={{ background: "var(--color-bg)" }}>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
             { key: "orders", label: "Pedidos", icon: LayoutDashboard, badge: pendingCount },
             { key: "menu", label: "Cardápio", icon: UtensilsCrossed },
             { key: "settings", label: "Configurações", icon: Settings },
-          ] as const).map(({ key, label, icon: Icon, badge }) => (
+          ] as any[]).map(({ key, label, icon: Icon, badge }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
@@ -180,7 +180,7 @@ function OrdersTab({
   return (
     <div className="flex flex-col gap-6">
       {columns.map((col) => {
-        const orders = activeOrders.filter((o) => o.status === col.status);
+        const orders = activeOrders.filter((o: any) => o.status === col.status);
         if (orders.length === 0) return null;
         return (
           <div key={col.status}>
@@ -194,7 +194,7 @@ function OrdersTab({
               </h2>
             </div>
             <div className="flex flex-col gap-3">
-              {orders.map((order) => (
+              {orders.map((order: any) => (
                 <OrderCard key={order._id} order={order} />
               ))}
             </div>

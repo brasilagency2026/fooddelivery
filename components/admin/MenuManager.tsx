@@ -26,7 +26,7 @@ export function MenuManager({ restaurantId }: { restaurantId: Id<"restaurants"> 
   const deleteItem = useMutation(api.menuItems.deleteMenuItem);
 
   const categories = menuItems
-    ? [...new Set(menuItems.map((i) => i.category || "Sem categoria"))]
+    ? [...new Set(menuItems.map((i: any) => i.category || "Sem categoria"))]
     : [];
 
   async function handleToggleAvailable(item: MenuItem) {
@@ -92,8 +92,8 @@ export function MenuManager({ restaurantId }: { restaurantId: Id<"restaurants"> 
           </h3>
           <div className="flex flex-col gap-2">
             {menuItems
-              ?.filter((i) => (i.category || "Sem categoria") === cat)
-              .map((item) => (
+              ?.filter((i: any) => (i.category || "Sem categoria") === cat)
+              .map((item: any) => (
                 <div
                   key={item._id}
                   className="glass-card p-3 flex items-center gap-3"

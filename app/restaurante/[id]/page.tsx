@@ -65,7 +65,7 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
 
   // Group menu items by category
   const categories = menuItems
-    ? [...new Set(menuItems.map((i) => i.category || "Cardápio"))]
+    ? [...new Set(menuItems.map((i: any) => i.category || "Cardápio"))]
     : [];
 
   if (!restaurant) {
@@ -136,8 +136,8 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
             </h2>
             <div className="flex flex-col gap-3">
               {menuItems
-                ?.filter((item) => (item.category || "Cardápio") === category)
-                .map((item) => {
+                ?.filter((item: any) => (item.category || "Cardápio") === category)
+                .map((item: any) => {
                   const cartItem = cart.find((c) => c.menuItemId === item._id);
                   return (
                     <div
