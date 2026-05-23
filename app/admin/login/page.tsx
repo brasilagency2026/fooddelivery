@@ -33,8 +33,8 @@ export default function AdminLoginPage() {
             },
           },
         }}
-        redirectUrl="/admin/dashboard"
-        signUpUrl="/admin/login"
+        routing="hash"
+        fallbackRedirectUrl="/admin/dashboard"
       />
     </div>
   );
