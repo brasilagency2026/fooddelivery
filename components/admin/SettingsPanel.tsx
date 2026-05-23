@@ -14,6 +14,8 @@ interface Restaurant {
   deliveryFee: number;
   estimatedTimeMinutes: number;
   mercadoPagoAccessToken?: string;
+  state?: string;
+  city?: string;
 }
 
 export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant & { imageUrl?: string }; ownerId: string }) {
@@ -23,6 +25,8 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant 
     estimatedTimeMinutes: restaurant.estimatedTimeMinutes,
     mercadoPagoAccessToken: restaurant.mercadoPagoAccessToken || "",
     description: restaurant.description,
+    state: restaurant.state || "",
+    city: restaurant.city || "",
   });
   
   const [showToken, setShowToken] = useState(false);
@@ -104,6 +108,8 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant 
         estimatedTimeMinutes: form.estimatedTimeMinutes,
         mercadoPagoAccessToken: form.mercadoPagoAccessToken || undefined,
         description: form.description,
+        state: form.state || undefined,
+        city: form.city || undefined,
         storageId: storageId,
         imageUrl: !selectedFile ? restaurant.imageUrl : undefined,
       });
@@ -179,24 +185,59 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant 
         </div>
       </section>
 
-      {/* Description */}
+      {/* Description & Address */}
       <section className="glass-card p-4">
         <h2 className="font-semibold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
-          Descrição do Restaurante
+          Sobre o Restaurante
         </h2>
-        <textarea
-          value={form.description}
-          onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-          rows={3}
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
-          style={{
-            background: "var(--color-surface-2)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text)",
-          }}
-          onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
-          onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
-        />
+        
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Estado (UF)</label>
+              <input
+                type="text"
+                value={form.state}
+                onChange={(e) => setForm((p) => ({ ...p, state: e.target.value }))}
+                placeholder="Ex: SP"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+            </div>
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Cidade</label>
+              <input
+                type="text"
+                value={form.city}
+                onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
+                placeholder="Ex: São Paulo"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>Descrição</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
+              style={{
+                background: "var(--color-surface-2)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text)",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+              onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+            />
+          </div>
+        </div>
       </section>
 
       {/* Mercado Pago */}

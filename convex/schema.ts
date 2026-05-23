@@ -17,9 +17,14 @@ export default defineSchema({
     mercadoPagoAccessToken: v.optional(v.string()),
     cuisine: v.optional(v.string()),
     phone: v.optional(v.string()),
+    state: v.optional(v.string()), // e.g. "sp"
+    city: v.optional(v.string()), // e.g. "São Paulo"
+    citySlug: v.optional(v.string()), // e.g. "sao-paulo"
+    restaurantSlug: v.optional(v.string()), // e.g. "pizza-pronto"
   })
     .index("by_owner", ["ownerId"])
-    .index("by_status", ["approvalStatus", "isOpen"]),
+    .index("by_status", ["approvalStatus", "isOpen"])
+    .index("by_slug", ["state", "citySlug", "restaurantSlug"]),
 
   menuItems: defineTable({
     restaurantId: v.id("restaurants"),

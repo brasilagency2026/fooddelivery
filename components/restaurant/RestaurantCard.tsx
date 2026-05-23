@@ -11,11 +11,18 @@ interface Restaurant {
   estimatedTimeMinutes: number;
   distance?: number;
   isOpen: boolean;
+  state?: string;
+  citySlug?: string;
+  restaurantSlug?: string;
 }
 
 export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+  const state = restaurant.state?.toLowerCase() || "sp";
+  const city = restaurant.citySlug || "cidade";
+  const slug = restaurant.restaurantSlug || restaurant._id;
+
   return (
-    <Link href={`/restaurante/${restaurant._id}`}>
+    <Link href={`/${state}/${city}/${slug}`}>
       <div
         className="glass-card overflow-hidden hover:border-orange-500/40 transition-all duration-300 cursor-pointer group"
         style={{ borderColor: "var(--color-border)" }}

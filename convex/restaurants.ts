@@ -1,6 +1,18 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+function generateSlug(text: string): string {
+  return text
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+}
+
 // Haversine formula to calculate distance between two coordinates
 function haversineDistance(
   lat1: number,
@@ -66,6 +78,23 @@ export const getRestaurant = query({
   },
 });
 
+// Get restaurant by slug
+export const getRestaurantBySlug = query({
+  args: {
+    state: v.string(),
+    citySlug: v.string(),
+    restaurantSlug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("restaurants")
+      .withIndex("by_slug", (q) => 
+        q.eq("state", args.state).eq("citySlug", args.citySlug).eq("restaurantSlug", args.restaurantSlug)
+      )
+      .first();
+  },
+});
+
 // Get restaurant owned by current user
 export const getMyRestaurant = query({
   args: { ownerId: v.string() },
@@ -91,10 +120,37 @@ export const createRestaurant = mutation({
     cuisine: v.optional(v.string()),
     phone: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    state: v.string(),
+    city: v.string(),
   },
   handler: async (ctx, args) => {
+    const { city, ...rest } = args;
+    const state = args.state.toLowerCase();
+    const citySlug = generateSlug(city);
+    
+    let baseSlug = generateSlug(args.name);
+    let restaurantSlug = baseSlug;
+    
+    let counter = 1;
+    while (true) {
+      const existing = await ctx.db
+        .query("restaurants")
+        .withIndex("by_slug", (q) => 
+          q.eq("state", state).eq("citySlug", citySlug).eq("restaurantSlug", restaurantSlug)
+        )
+        .first();
+      
+      if (!existing) break;
+      restaurantSlug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
     return await ctx.db.insert("restaurants", {
-      ...args,
+      ...rest,
+      state,
+      city,
+      citySlug,
+      restaurantSlug,
       isOpen: false,
       approvalStatus: "approved", // Changed to approved for testing
     });
@@ -128,13 +184,15 @@ export const updateRestaurantSettings = mutation({
     description: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     storageId: v.optional(v.id("_storage")),
+    state: v.optional(v.string()),
+    city: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const restaurant = await ctx.db.get(args.restaurantId);
     if (!restaurant || restaurant.ownerId !== args.ownerId) {
       throw new Error("Unauthorized");
     }
-    const { restaurantId, ownerId, storageId, ...updates } = args;
+    const { restaurantId, ownerId, storageId, city, ...updates } = args;
     
     let finalUpdates: any = { ...updates };
     
@@ -142,10 +200,47 @@ export const updateRestaurantSettings = mutation({
       const url = await ctx.storage.getUrl(storageId);
       if (url) finalUpdates.imageUrl = url;
     }
+    
+    if (city) finalUpdates.citySlug = generateSlug(city);
+    if (updates.state) finalUpdates.state = updates.state.toLowerCase();
 
     const filteredUpdates = Object.fromEntries(
       Object.entries(finalUpdates).filter(([, v]) => v !== undefined)
     );
     await ctx.db.patch(args.restaurantId, filteredUpdates);
   },
+});
+
+// Migrate old restaurants to have slugs
+export const migrateSlugs = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const restaurants = await ctx.db.query("restaurants").collect();
+    for (const r of restaurants) {
+      if (!r.state || !r.citySlug || !r.restaurantSlug) {
+        const state = "sp";
+        const citySlug = "sao-paulo";
+        const baseSlug = generateSlug(r.name);
+        let restaurantSlug = baseSlug;
+        let counter = 1;
+        while (true) {
+          const existing = await ctx.db
+            .query("restaurants")
+            .withIndex("by_slug", (q) => 
+              q.eq("state", state).eq("citySlug", citySlug).eq("restaurantSlug", restaurantSlug)
+            )
+            .first();
+          if (!existing || existing._id === r._id) break;
+          restaurantSlug = `${baseSlug}-${counter}`;
+          counter++;
+        }
+        await ctx.db.patch(r._id, {
+          state,
+          city: "São Paulo",
+          citySlug,
+          restaurantSlug
+        });
+      }
+    }
+  }
 });

@@ -10,6 +10,8 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
   const [form, setForm] = useState({
     name: "",
     description: "",
+    state: "",
+    city: "",
     cuisine: "",
     phone: "",
     deliveryRadiusKm: 10,
@@ -40,13 +42,15 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
   }
 
   async function handleSubmit() {
-    if (!form.name || !locationOk) return;
+    if (!form.name || !form.state || !form.city || !locationOk) return;
     setSaving(true);
     try {
       await createRestaurant({
         ownerId,
         name: form.name,
         description: form.description,
+        state: form.state,
+        city: form.city,
         cuisine: form.cuisine || undefined,
         phone: form.phone || undefined,
         latitude: form.latitude,
@@ -63,6 +67,8 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
   const fields = [
     { label: "Nome do restaurante *", key: "name", placeholder: "Ex: Burguer Palace" },
     { label: "Descrição *", key: "description", placeholder: "O que você serve? O que te diferencia?" },
+    { label: "Estado (UF) *", key: "state", placeholder: "Ex: SP" },
+    { label: "Cidade *", key: "city", placeholder: "Ex: São Paulo" },
     { label: "Tipo de culinária", key: "cuisine", placeholder: "Ex: Hambúrgueres, Pizza, Japonesa..." },
     { label: "WhatsApp do restaurante", key: "phone", placeholder: "(11) 99999-9999" },
   ];
@@ -156,7 +162,7 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
 
           <button
             onClick={handleSubmit}
-            disabled={!form.name || !form.description || !locationOk || saving}
+            disabled={!form.name || !form.state || !form.city || !form.description || !locationOk || saving}
             className="btn-orange flex items-center justify-center gap-2 mt-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : "Enviar cadastro para análise"}

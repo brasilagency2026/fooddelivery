@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import { ArrowLeft, Clock, MapPin, ShoppingCart, Plus, Minus, X, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,18 +16,20 @@ interface CartItem {
   notes?: string;
 }
 
-export default function RestaurantePage({ params }: { params: { id: string } }) {
+export default function RestaurantePage({ params }: { params: { estado: string, cidade: string, slug: string } }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [variationModalItem, setVariationModalItem] = useState<any | null>(null);
 
-  const restaurant = useQuery(api.restaurants.getRestaurant, {
-    restaurantId: params.id as Id<"restaurants">,
+  const restaurant = useQuery(api.restaurants.getRestaurantBySlug, {
+    state: params.estado,
+    citySlug: params.cidade,
+    restaurantSlug: params.slug,
   });
 
-  const menuItems = useQuery(api.menuItems.getMenuItems, {
-    restaurantId: params.id as Id<"restaurants">,
-  });
+  const menuItems = useQuery(api.menuItems.getMenuItems, restaurant ? {
+    restaurantId: restaurant._id,
+  } : "skip");
 
   function addToCart(item: any, variationName?: string, priceOverride?: number) {
     setCart((prev) => {
@@ -64,8 +65,9 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
+    if (!restaurant) return;
     sessionStorage.setItem("cart", JSON.stringify(cart));
-    sessionStorage.setItem("restaurantId", params.id);
+    sessionStorage.setItem("restaurantId", restaurant._id);
     router.push("/checkout");
   };
 
@@ -73,10 +75,21 @@ export default function RestaurantePage({ params }: { params: { id: string } }) 
     ? [...new Set(menuItems.map((i: any) => i.category || "Cardápio"))]
     : [];
 
-  if (!restaurant) {
+  if (restaurant === undefined) {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--color-orange)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+
+  if (restaurant === null) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center p-4 text-center">
+        <div className="text-6xl mb-4">🍽️</div>
+        <h1 className="text-xl font-bold mb-2">Restaurante não encontrado</h1>
+        <p className="text-sm mb-6" style={{ color: "var(--color-text-muted)" }}>O link pode estar quebrado ou o restaurante foi removido.</p>
+        <Link href="/" className="btn-orange text-sm px-6 py-2">Voltar para o início</Link>
       </div>
     );
   }
