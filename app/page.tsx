@@ -164,6 +164,35 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* Floating Action Button for My Orders */}
+      <MeusPedidosButton />
+    </div>
+  );
+}
+
+function MeusPedidosButton() {
+  const [hasOrders, setHasOrders] = useState(false);
+
+  useEffect(() => {
+    const orders = JSON.parse(localStorage.getItem("myOrders") || "[]");
+    setHasOrders(orders.length > 0);
+  }, []);
+
+  if (!hasOrders) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 animate-slide-up" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
+      <button
+        onClick={() => window.location.href = "/meus-pedidos"}
+        className="flex items-center gap-2 px-5 py-3 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+        style={{ background: "var(--color-orange)", color: "white" }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span className="font-bold text-sm">Meus Pedidos</span>
+      </button>
     </div>
   );
 }

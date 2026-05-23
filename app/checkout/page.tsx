@@ -218,6 +218,11 @@ export default function CheckoutPage() {
       sessionStorage.removeItem("cart");
       sessionStorage.removeItem("restaurantId");
 
+      // Save to client's order history
+      const currentOrders = JSON.parse(localStorage.getItem("myOrders") || "[]");
+      const newOrders = [orderId, ...currentOrders.filter((id: string) => id !== orderId)].slice(0, 10);
+      localStorage.setItem("myOrders", JSON.stringify(newOrders));
+
       // Redirect immediately to success for testing
       router.push(`/acompanhamento/${orderId}?payment=success`);
       // const isDev = process.env.NODE_ENV === "development";

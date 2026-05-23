@@ -73,6 +73,34 @@ export const getOrder = query({
   },
 });
 
+// Get multiple orders by IDs (for client order history)
+export const getOrdersByIds = query({
+  args: { orderIds: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const orders = [];
+    for (const idStr of args.orderIds) {
+      try {
+        const orderId = ctx.db.normalizeId("orders", idStr);
+        if (orderId) {
+          const order = await ctx.db.get(orderId);
+          if (order) {
+            // Fetch restaurant details for the order
+            const restaurant = await ctx.db.get(order.restaurantId);
+            orders.push({
+              ...order,
+              restaurantName: restaurant?.name || "Restaurante",
+            });
+          }
+        }
+      } catch (e) {
+        // Ignore invalid IDs
+      }
+    }
+    // Sort by createdAt descending
+    return orders.sort((a, b) => b.createdAt - a.createdAt);
+  },
+});
+
 // Create a new order
 export const createOrder = mutation({
   args: {
