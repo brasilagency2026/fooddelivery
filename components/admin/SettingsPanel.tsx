@@ -16,7 +16,7 @@ interface Restaurant {
   mercadoPagoAccessToken?: string;
 }
 
-export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant; ownerId: string }) {
+export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant & { imageUrl?: string }; ownerId: string }) {
   const [form, setForm] = useState({
     deliveryRadiusKm: restaurant.deliveryRadiusKm,
     deliveryFee: restaurant.deliveryFee,
@@ -24,15 +24,78 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant;
     mercadoPagoAccessToken: restaurant.mercadoPagoAccessToken || "",
     description: restaurant.description,
   });
+  
   const [showToken, setShowToken] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(restaurant.imageUrl || null);
 
   const updateSettings = useMutation(api.restaurants.updateRestaurantSettings);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+
+  async function compressImage(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1200; // Slightly larger for restaurant banner
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Falha na compressão da imagem"));
+          },
+          "image/jpeg",
+          0.85
+        );
+      };
+      img.onerror = (err) => reject(err);
+    });
+  }
 
   async function handleSave() {
     setSaving(true);
     try {
+      let storageId: Id<"_storage"> | undefined;
+
+      if (selectedFile) {
+        const compressedBlob = await compressImage(selectedFile);
+        const uploadUrl = await generateUploadUrl();
+        
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": "image/jpeg" },
+          body: compressedBlob,
+        });
+
+        if (!result.ok) throw new Error("Falha no upload da imagem");
+        const { storageId: uploadedStorageId } = await result.json();
+        storageId = uploadedStorageId;
+      }
+
       await updateSettings({
         restaurantId: restaurant._id as Id<"restaurants">,
         ownerId,
@@ -41,9 +104,13 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant;
         estimatedTimeMinutes: form.estimatedTimeMinutes,
         mercadoPagoAccessToken: form.mercadoPagoAccessToken || undefined,
         description: form.description,
+        storageId: storageId,
+        imageUrl: !selectedFile ? restaurant.imageUrl : undefined,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+    } catch (e: any) {
+      alert("Erro ao salvar: " + e.message);
     } finally {
       setSaving(false);
     }
@@ -51,6 +118,33 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant;
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Cover Image */}
+      <section className="glass-card p-4">
+        <h2 className="font-semibold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>
+          Foto de Capa do Restaurante
+        </h2>
+        <div className="flex flex-col gap-4">
+          {previewUrl && (
+            <div className="w-full h-40 rounded-xl overflow-hidden" style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}>
+              <img src={previewUrl} alt="Capa" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setSelectedFile(file);
+                setPreviewUrl(URL.createObjectURL(file));
+              }
+            }}
+            className="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-orange)] file:text-white hover:file:opacity-80 transition-all cursor-pointer"
+            style={{ color: "var(--color-text-muted)" }}
+          />
+        </div>
+      </section>
+
       {/* Delivery settings */}
       <section className="glass-card p-4">
         <h2 className="font-semibold mb-4 text-sm uppercase tracking-wider" style={{ color: "var(--color-text-muted)" }}>

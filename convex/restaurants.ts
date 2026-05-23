@@ -126,15 +126,25 @@ export const updateRestaurantSettings = mutation({
     estimatedTimeMinutes: v.optional(v.number()),
     mercadoPagoAccessToken: v.optional(v.string()),
     description: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const restaurant = await ctx.db.get(args.restaurantId);
     if (!restaurant || restaurant.ownerId !== args.ownerId) {
       throw new Error("Unauthorized");
     }
-    const { restaurantId, ownerId, ...updates } = args;
+    const { restaurantId, ownerId, storageId, ...updates } = args;
+    
+    let finalUpdates: any = { ...updates };
+    
+    if (storageId) {
+      const url = await ctx.storage.getUrl(storageId);
+      if (url) finalUpdates.imageUrl = url;
+    }
+
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, v]) => v !== undefined)
+      Object.entries(finalUpdates).filter(([, v]) => v !== undefined)
     );
     await ctx.db.patch(args.restaurantId, filteredUpdates);
   },
