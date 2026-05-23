@@ -193,27 +193,30 @@ export default function CheckoutPage() {
         deliveryFee,
       });
 
-      const baseUrl = window.location.origin;
-      const payment = await createPayment({
-        orderId,
-        restaurantId: restaurantId as Id<"restaurants">,
-        items: cart.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-        deliveryFee,
-        totalAmount: total,
-        customerName: form.customerName,
-        customerPhone: form.customerPhone,
-        backUrls: {
-          success: `${baseUrl}/acompanhamento/${orderId}?payment=success`,
-          failure: `${baseUrl}/acompanhamento/${orderId}?payment=failure`,
-          pending: `${baseUrl}/acompanhamento/${orderId}?payment=pending`,
-        },
-      });
+      // Bypassing Mercado Pago for testing
+      // const baseUrl = window.location.origin;
+      // const payment = await createPayment({
+      //   orderId,
+      //   restaurantId: restaurantId as Id<"restaurants">,
+      //   items: cart.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      //   deliveryFee,
+      //   totalAmount: total,
+      //   customerName: form.customerName,
+      //   customerPhone: form.customerPhone,
+      //   backUrls: {
+      //     success: `${baseUrl}/acompanhamento/${orderId}?payment=success`,
+      //     failure: `${baseUrl}/acompanhamento/${orderId}?payment=failure`,
+      //     pending: `${baseUrl}/acompanhamento/${orderId}?payment=pending`,
+      //   },
+      // });
 
       sessionStorage.removeItem("cart");
       sessionStorage.removeItem("restaurantId");
 
-      const isDev = process.env.NODE_ENV === "development";
-      window.location.href = isDev ? payment.sandboxInitPoint : payment.initPoint;
+      // Redirect immediately to success for testing
+      router.push(`/acompanhamento/${orderId}?payment=success`);
+      // const isDev = process.env.NODE_ENV === "development";
+      // window.location.href = isDev ? payment.sandboxInitPoint : payment.initPoint;
     } catch (err: any) {
       setError(err.message || "Erro ao processar pedido. Tente novamente.");
       setLoading(false);
