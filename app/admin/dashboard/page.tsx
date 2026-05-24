@@ -25,7 +25,7 @@ export default function AdminDashboard() {
   );
 
   const activeOrders = useQuery(
-    api.orders.getActiveOrdersAdmin,
+    api.orders.getActiveOrders,
     restaurant ? { restaurantId: restaurant._id } : "skip"
   );
   
