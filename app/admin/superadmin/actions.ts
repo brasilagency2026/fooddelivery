@@ -29,11 +29,17 @@ function getAdminSecret() {
 }
 
 export async function fetchAllRestaurantsAdmin() {
-  await checkSuperAdmin();
-  const convex = getConvexClient();
-  return await convex.query(api.admin.getAllRestaurantsAdmin, {
-    adminSecret: getAdminSecret(),
-  });
+  try {
+    await checkSuperAdmin();
+    const convex = getConvexClient();
+    const data = await convex.query(api.admin.getAllRestaurantsAdmin, {
+      adminSecret: getAdminSecret(),
+    });
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("[SuperAdmin Error]", err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 export async function updateRestaurantStatus(
@@ -45,42 +51,59 @@ export async function updateRestaurantStatus(
     isOpen?: boolean;
   }
 ) {
-  await checkSuperAdmin();
-  const convex = getConvexClient();
-  await convex.mutation(api.admin.updateRestaurantAdmin, {
-    adminSecret: getAdminSecret(),
-    restaurantId: restaurantId as Id<"restaurants">,
-    updates,
-  });
-  revalidatePath("/admin/superadmin");
+  try {
+    await checkSuperAdmin();
+    const convex = getConvexClient();
+    await convex.mutation(api.admin.updateRestaurantAdmin, {
+      adminSecret: getAdminSecret(),
+      restaurantId: restaurantId as Id<"restaurants">,
+      updates,
+    });
+    revalidatePath("/admin/superadmin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("[SuperAdmin Error]", err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 export async function deleteRestaurant(restaurantId: string) {
-  await checkSuperAdmin();
-  const convex = getConvexClient();
-  await convex.mutation(api.admin.deleteRestaurantAdmin, {
-    adminSecret: getAdminSecret(),
-    restaurantId: restaurantId as Id<"restaurants">,
-  });
-  revalidatePath("/admin/superadmin");
+  try {
+    await checkSuperAdmin();
+    const convex = getConvexClient();
+    await convex.mutation(api.admin.deleteRestaurantAdmin, {
+      adminSecret: getAdminSecret(),
+      restaurantId: restaurantId as Id<"restaurants">,
+    });
+    revalidatePath("/admin/superadmin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("[SuperAdmin Error]", err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 export async function addSubscriptionDays(restaurantId: string, currentEndDate: number | undefined, daysToAdd: number) {
-  await checkSuperAdmin();
-  const convex = getConvexClient();
-  
-  const now = Date.now();
-  // If no end date or it's in the past, start from now. Otherwise, add to the current end date.
-  const baseDate = (!currentEndDate || currentEndDate < now) ? now : currentEndDate;
-  const newEndDate = baseDate + daysToAdd * 24 * 60 * 60 * 1000;
-  
-  await convex.mutation(api.admin.updateRestaurantAdmin, {
-    adminSecret: getAdminSecret(),
-    restaurantId: restaurantId as Id<"restaurants">,
-    updates: {
-      subscriptionStatus: "active",
-      subscriptionEndDate: newEndDate,
-    },
-  });
-  revalidatePath("/admin/superadmin");
+  try {
+    await checkSuperAdmin();
+    const convex = getConvexClient();
+    
+    const now = Date.now();
+    const baseDate = (!currentEndDate || currentEndDate < now) ? now : currentEndDate;
+    const newEndDate = baseDate + daysToAdd * 24 * 60 * 60 * 1000;
+    
+    await convex.mutation(api.admin.updateRestaurantAdmin, {
+      adminSecret: getAdminSecret(),
+      restaurantId: restaurantId as Id<"restaurants">,
+      updates: {
+        subscriptionStatus: "active",
+        subscriptionEndDate: newEndDate,
+      },
+    });
+    revalidatePath("/admin/superadmin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("[SuperAdmin Error]", err.message);
+    return { success: false, error: err.message };
+  }
 }

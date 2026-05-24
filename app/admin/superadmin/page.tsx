@@ -21,8 +21,12 @@ export default function SuperAdminPage() {
   async function loadRestaurants() {
     try {
       setLoading(true);
-      const data = await fetchAllRestaurantsAdmin();
-      setRestaurants(data);
+      const res = await fetchAllRestaurantsAdmin();
+      if (!res.success) {
+        setError(res.error || "Erro desconhecido");
+        return;
+      }
+      setRestaurants(res.data);
     } catch (err: any) {
       setError(err.message || "Unauthorized or error loading data");
     } finally {
@@ -32,21 +36,24 @@ export default function SuperAdminPage() {
 
   async function handleApprove(id: string, currentStatus: string) {
     const newStatus = currentStatus === "approved" ? "pending" : "approved";
-    await updateRestaurantStatus(id, { approvalStatus: newStatus });
-    await loadRestaurants();
+    const res = await updateRestaurantStatus(id, { approvalStatus: newStatus });
+    if (res?.success) await loadRestaurants();
+    else alert("Erro: " + res?.error);
   }
 
   async function handleAddDays(id: string, currentEndDate: number | undefined, days: number) {
     if (confirm(`Adicionar ${days} dias de assinatura?`)) {
-      await addSubscriptionDays(id, currentEndDate, days);
-      await loadRestaurants();
+      const res = await addSubscriptionDays(id, currentEndDate, days);
+      if (res?.success) await loadRestaurants();
+      else alert("Erro: " + res?.error);
     }
   }
 
   async function handleDelete(id: string, name: string) {
     if (confirm(`Tem certeza que deseja DELETAR o restaurante ${name}? Isso apagará todos os itens e pedidos dele.`)) {
-      await deleteRestaurant(id);
-      await loadRestaurants();
+      const res = await deleteRestaurant(id);
+      if (res?.success) await loadRestaurants();
+      else alert("Erro: " + res?.error);
     }
   }
 
