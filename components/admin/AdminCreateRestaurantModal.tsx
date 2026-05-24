@@ -1,0 +1,199 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { MapPin, Loader2, X } from "lucide-react";
+
+export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    state: "",
+    city: "",
+    cuisine: "",
+    phone: "",
+    deliveryRadiusKm: 10,
+    deliveryFee: 5,
+    estimatedTimeMinutes: 40,
+    latitude: 0,
+    longitude: 0,
+  });
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [locationOk, setLocationOk] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const createRestaurant = useMutation(api.restaurants.createRestaurant);
+
+  function getLocation() {
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setForm((p) => ({ ...p, latitude: pos.coords.latitude, longitude: pos.coords.longitude }));
+        setLocationOk(true);
+        setGettingLocation(false);
+      },
+      () => {
+        alert("Não foi possível obter sua localização.");
+        setGettingLocation(false);
+      }
+    );
+  }
+
+  async function handleSubmit() {
+    if (!form.name || !form.state || !form.city || !locationOk) return;
+    setSaving(true);
+    try {
+      // Use a special owner ID for unassigned restaurants
+      const pendingOwnerId = "admin_pending_" + Date.now();
+      
+      await createRestaurant({
+        ownerId: pendingOwnerId,
+        name: form.name,
+        description: form.description,
+        state: form.state,
+        city: form.city,
+        cuisine: form.cuisine || undefined,
+        phone: form.phone || undefined,
+        latitude: form.latitude,
+        longitude: form.longitude,
+        deliveryRadiusKm: form.deliveryRadiusKm,
+        deliveryFee: form.deliveryFee,
+        estimatedTimeMinutes: form.estimatedTimeMinutes,
+      });
+      
+      onSuccess();
+    } catch (e: any) {
+      alert("Erro ao criar: " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const fields = [
+    { label: "Nome do restaurante *", key: "name", placeholder: "Ex: Burguer Palace" },
+    { label: "Descrição *", key: "description", placeholder: "O que você serve? O que te diferencia?" },
+    { label: "Estado (UF) *", key: "state", placeholder: "Ex: SP" },
+    { label: "Cidade *", key: "city", placeholder: "Ex: São Paulo" },
+    { label: "Tipo de culinária", key: "cuisine", placeholder: "Ex: Hambúrgueres, Pizza, Japonesa..." },
+    { label: "WhatsApp do restaurante", key: "phone", placeholder: "(11) 99999-9999" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full max-w-lg rounded-2xl p-5" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", maxHeight: "90vh", overflowY: "auto" }}>
+        
+        <div className="flex items-center justify-between mb-5 sticky top-0 bg-[var(--color-surface)] z-10 pb-2 border-b border-[var(--color-border)]">
+          <h2 className="font-bold text-lg">Criar Restaurante (Admin)</h2>
+          <button onClick={onClose} style={{ color: "var(--color-text-muted)" }}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {/* Text fields */}
+          {fields.map(({ label, key, placeholder }) => (
+            <div key={key}>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--color-text-muted)" }}>{label}</label>
+              <input
+                type="text"
+                value={(form as any)[key]}
+                onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
+                placeholder={placeholder}
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+              />
+            </div>
+          ))}
+
+          {/* Delivery settings */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Raio (km)", key: "deliveryRadiusKm", min: 1, step: 1 },
+              { label: "Taxa (R$)", key: "deliveryFee", min: 0, step: 0.5 },
+              { label: "Tempo (min)", key: "estimatedTimeMinutes", min: 10, step: 5 },
+            ].map(({ label, key, min, step }) => (
+              <div key={key}>
+                <label className="block text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>{label}</label>
+                <input
+                  type="number"
+                  value={(form as any)[key]}
+                  onChange={(e) => setForm((p) => ({ ...p, [key]: Number(e.target.value) }))}
+                  min={min}
+                  step={step}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                  onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
+                  onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Location */}
+          <div className="glass-card p-4">
+            <p className="text-sm font-semibold mb-1">Localização do restaurante (GPS) *</p>
+            <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
+              Você pode digitar manualmente as coordenadas para não usar sua localização atual.
+            </p>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1">
+                <label className="block text-[10px] uppercase mb-1" style={{ color: "var(--color-text-muted)" }}>Latitude</label>
+                <input
+                  type="number"
+                  value={form.latitude || ""}
+                  onChange={(e) => {
+                    setForm(p => ({ ...p, latitude: parseFloat(e.target.value) || 0 }));
+                    setLocationOk(true);
+                  }}
+                  placeholder="-23.5505"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[10px] uppercase mb-1" style={{ color: "var(--color-text-muted)" }}>Longitude</label>
+                <input
+                  type="number"
+                  value={form.longitude || ""}
+                  onChange={(e) => {
+                    setForm(p => ({ ...p, longitude: parseFloat(e.target.value) || 0 }));
+                    setLocationOk(true);
+                  }}
+                  placeholder="-46.6333"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={getLocation}
+              disabled={gettingLocation}
+              className="flex items-center justify-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-all w-full"
+              style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+            >
+              {gettingLocation ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <MapPin size={15} style={{ color: "var(--color-orange)" }} />
+              )}
+              Capturar minha localização via GPS
+            </button>
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!form.name || !form.state || !form.city || !form.description || !locationOk || saving}
+            className="btn-orange flex items-center justify-center gap-2 mt-4 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : "Criar Restaurante"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

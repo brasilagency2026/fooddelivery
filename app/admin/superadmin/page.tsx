@@ -10,13 +10,15 @@ import {
   generateTransferToken
 } from "./actions";
 
-import { Mail, Phone, Link2, UtensilsCrossed } from "lucide-react";
+import { Mail, Phone, Link2, UtensilsCrossed, Plus } from "lucide-react";
 import Link from "next/link";
+import { AdminCreateRestaurantModal } from "@/components/admin/AdminCreateRestaurantModal";
 
 export default function SuperAdminPage() {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     loadRestaurants();
@@ -92,13 +94,32 @@ export default function SuperAdminPage() {
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg)] p-6">
+      {showCreateModal && (
+        <AdminCreateRestaurantModal 
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={() => {
+            setShowCreateModal(false);
+            loadRestaurants();
+          }}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold gradient-text">Super Admin</h1>
             <p className="text-[var(--color-text-muted)] mt-1">Gerenciamento de Restaurantes e Assinaturas</p>
           </div>
-          <UserButton />
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="btn-orange flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Criar Restaurante
+            </button>
+            <UserButton />
+          </div>
         </div>
 
         <div className="glass-card overflow-x-auto">
