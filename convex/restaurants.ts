@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 function generateSlug(text: string): string {
   return text
@@ -156,7 +157,7 @@ export const createRestaurant = mutation({
       counter++;
     }
 
-    return await ctx.db.insert("restaurants", {
+    const newRestaurantId = await ctx.db.insert("restaurants", {
       ...rest,
       state,
       city,
@@ -168,6 +169,17 @@ export const createRestaurant = mutation({
       subscriptionEndDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days trial
       createdAt: Date.now(),
     });
+
+    // Send email alert to admin
+    await ctx.scheduler.runAfter(0, api.emails.sendNewRegistrationAlert, {
+      restaurantName: args.name,
+      city: args.city,
+      state: args.state,
+      phone: args.phone,
+      ownerId: args.ownerId,
+    });
+
+    return newRestaurantId;
   },
 });
 
