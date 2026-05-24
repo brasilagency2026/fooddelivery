@@ -24,6 +24,7 @@ export default defineSchema({
     currentOrderNumber: v.optional(v.number()), // Resets when opening
     subscriptionStatus: v.optional(v.string()), // "trial" | "active" | "past_due" | "canceled"
     subscriptionEndDate: v.optional(v.number()), // timestamp
+    transferToken: v.optional(v.string()), // Used for ownership transfer
     createdAt: v.optional(v.number()),
   })
     .index("by_owner", ["ownerId"])

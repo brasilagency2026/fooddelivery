@@ -19,6 +19,8 @@ interface Restaurant {
   city?: string;
   citySlug?: string;
   restaurantSlug?: string;
+  subscriptionStatus?: string;
+  subscriptionEndDate?: number;
 }
 
 export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant & { imageUrl?: string }; ownerId: string }) {

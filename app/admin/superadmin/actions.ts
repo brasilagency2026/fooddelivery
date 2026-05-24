@@ -85,18 +85,32 @@ export async function updateRestaurantStatus(
   }
 }
 
-export async function deleteRestaurant(convexUrl: string, restaurantId: string) {
+export async function deleteRestaurant(convexUrl: string, id: string) {
   try {
     await checkSuperAdmin();
     const convex = getConvexClient(convexUrl);
     await convex.mutation(api.admin.deleteRestaurantAdmin, {
+      restaurantId: id as Id<"restaurants">,
       adminSecret: getAdminSecret(),
-      restaurantId: restaurantId as Id<"restaurants">,
     });
     revalidatePath("/admin/superadmin");
     return { success: true };
   } catch (err: any) {
-    console.error("[SuperAdmin Error]", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function generateTransferToken(convexUrl: string, id: string) {
+  try {
+    await checkSuperAdmin();
+    const convex = getConvexClient(convexUrl);
+    const token = await convex.mutation(api.admin.generateTransferToken, {
+      restaurantId: id as Id<"restaurants">,
+      adminSecret: getAdminSecret(),
+    });
+    revalidatePath("/admin/superadmin");
+    return { success: true, token };
+  } catch (err: any) {
     return { success: false, error: err.message };
   }
 }

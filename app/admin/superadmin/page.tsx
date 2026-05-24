@@ -6,10 +6,12 @@ import {
   fetchAllRestaurantsAdmin, 
   updateRestaurantStatus, 
   deleteRestaurant, 
-  addSubscriptionDays 
+  addSubscriptionDays,
+  generateTransferToken
 } from "./actions";
 
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Link2, UtensilsCrossed } from "lucide-react";
+import Link from "next/link";
 
 export default function SuperAdminPage() {
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -58,6 +60,20 @@ export default function SuperAdminPage() {
       const res = await deleteRestaurant(convexUrl, id);
       if (res?.success) await loadRestaurants();
       else alert("Erro: " + res?.error);
+    }
+  }
+
+  async function handleGenerateToken(id: string) {
+    if (confirm("Gerar um link mágico de transferência para este restaurante?")) {
+      const res = await generateTransferToken(convexUrl, id);
+      if (res?.success && res.token) {
+        const link = `${window.location.origin}/claim?token=${res.token}`;
+        navigator.clipboard.writeText(link);
+        alert(`Link copiado para a área de transferência!\n\nEnvie este link para o dono assumir o restaurante:\n\n${link}`);
+        await loadRestaurants();
+      } else {
+        alert("Erro ao gerar token: " + res?.error);
+      }
     }
   }
 
@@ -167,21 +183,42 @@ export default function SuperAdminPage() {
                       ) : "Sem data"}
                     </td>
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => handleAddDays(rest._id, rest.subscriptionEndDate, 30)}
-                          className="px-3 py-1.5 text-xs font-bold bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                          title="Adicionar 30 dias de assinatura"
-                        >
-                          +30 Dias
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(rest._id, rest.name)}
-                          className="px-3 py-1.5 text-xs font-bold bg-red-500 text-white rounded hover:bg-red-600 transition"
-                          title="Apagar Restaurante"
-                        >
-                          Deletar
-                        </button>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/superadmin/menu/${rest._id}`}
+                            className="px-3 py-1.5 text-xs font-bold bg-[var(--color-orange)] text-white rounded hover:opacity-90 flex items-center gap-1 transition"
+                            title="Gerenciar Cardápio"
+                          >
+                            <UtensilsCrossed size={14} />
+                            Menu
+                          </Link>
+                          
+                          <button 
+                            onClick={() => handleGenerateToken(rest._id)}
+                            className="px-3 py-1.5 text-xs font-bold bg-gray-700 text-white rounded hover:bg-gray-800 flex items-center gap-1 transition"
+                            title="Gerar link de transferência"
+                          >
+                            <Link2 size={14} />
+                            Transferir
+                          </button>
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleAddDays(rest._id, rest.subscriptionEndDate, 30)}
+                            className="px-3 py-1.5 text-xs font-bold bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                            title="Adicionar 30 dias de assinatura"
+                          >
+                            +30 Dias
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(rest._id, rest.name)}
+                            className="px-3 py-1.5 text-xs font-bold bg-red-500 text-white rounded hover:bg-red-600 transition"
+                            title="Apagar Restaurante"
+                          >
+                            Deletar
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -189,7 +226,7 @@ export default function SuperAdminPage() {
               })}
               {restaurants.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-[var(--color-text-muted)]">Nenhum restaurante encontrado.</td>
+                  <td colSpan={6} className="p-8 text-center text-[var(--color-text-muted)]">Nenhum restaurante encontrado.</td>
                 </tr>
               )}
             </tbody>

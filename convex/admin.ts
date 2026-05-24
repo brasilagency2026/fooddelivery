@@ -74,3 +74,41 @@ export const deleteRestaurantAdmin = mutation({
     await ctx.db.delete(args.restaurantId);
   },
 });
+
+export const generateTransferToken = mutation({
+  args: {
+    restaurantId: v.id("restaurants"),
+    adminSecret: v.string(),
+  },
+  handler: async (ctx, args) => {
+    checkAdminSecret(args.adminSecret);
+    
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    await ctx.db.patch(args.restaurantId, { transferToken: token });
+    return token;
+  }
+});
+
+export const claimRestaurant = mutation({
+  args: {
+    transferToken: v.string(),
+    newOwnerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const restaurants = await ctx.db.query("restaurants").collect();
+    const restaurantToClaim = restaurants.find(r => r.transferToken === args.transferToken);
+
+    if (!restaurantToClaim) {
+      throw new Error("Link de transferência inválido ou expirado.");
+    }
+
+    // Set new owner and remove the token so it can't be reused
+    await ctx.db.patch(restaurantToClaim._id, {
+      ownerId: args.newOwnerId,
+      transferToken: undefined,
+    });
+
+    return restaurantToClaim._id;
+  }
+});
