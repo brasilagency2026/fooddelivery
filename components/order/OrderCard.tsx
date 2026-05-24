@@ -81,7 +81,7 @@ export function OrderCard({ order }: { order: Order }) {
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
     const courierLink = `${baseUrl}/courier/deliver/${order._id}`;
     
-    const text = `*NOVA ENTREGA* 🛵\n\n*Pedido:* ${displayOrderNumber}\n*Cliente:* ${order.customerName}\n*Telefone:* ${order.customerPhone}\n\n*Endereço:*\n${address}\n${order.deliveryAddress.reference ? `*Ref:* ${order.deliveryAddress.reference}\n` : ""}\n*Valor a cobrar:* ${order.paymentStatus === "paid" ? "PAGO ONLINE (Não cobrar)" : `R$ ${(order.totalAmount + order.deliveryFee).toFixed(2)}`}\n\n📍 *Navegar:*\nGoogle Maps: ${mapsLink}\nWaze: ${wazeLink}\n\n✅ *Após entregar, clique no link abaixo para baixar no sistema:*\n${courierLink}`;
+    const text = `*NOVA ENTREGA* 🛵\n\n*Pedido:* ${displayOrderNumber}\n*Cliente:* ${order.customerName}\n*Telefone:* ${order.customerPhone}\n\n*Endereço:*\n${address}\n${order.deliveryAddress.reference ? `*Ref:* ${order.deliveryAddress.reference}\n` : ""}\n📍 *Navegar:*\nGoogle Maps: ${mapsLink}\nWaze: ${wazeLink}\n\n✅ *Após entregar, clique no link abaixo para baixar no sistema:*\n${courierLink}`;
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(whatsappUrl, "_blank");

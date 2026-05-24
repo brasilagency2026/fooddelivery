@@ -99,13 +99,7 @@ export default function CourierDeliveryPage({ params }: { params: { orderId: str
                   )}
                 </div>
               </div>
-              
-              <div className="pt-4 border-t" style={{ borderColor: "var(--color-border)" }}>
-                <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>Valor a cobrar na entrega:</p>
-                <p className="text-lg font-bold" style={{ color: order.paymentStatus === "paid" ? "#22c55e" : "var(--color-orange)" }}>
-                  {order.paymentStatus === "paid" ? "PAGO ONLINE" : `R$ ${(order.totalAmount + order.deliveryFee).toFixed(2)}`}
-                </p>
-              </div>
+
             </div>
 
             <button
