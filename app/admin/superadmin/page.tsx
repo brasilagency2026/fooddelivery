@@ -18,10 +18,12 @@ export default function SuperAdminPage() {
     loadRestaurants();
   }, []);
 
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
+
   async function loadRestaurants() {
     try {
       setLoading(true);
-      const res = await fetchAllRestaurantsAdmin();
+      const res = await fetchAllRestaurantsAdmin(convexUrl);
       if (!res.success) {
         setError(res.error || "Erro desconhecido");
         return;
@@ -36,14 +38,14 @@ export default function SuperAdminPage() {
 
   async function handleApprove(id: string, currentStatus: string) {
     const newStatus = currentStatus === "approved" ? "pending" : "approved";
-    const res = await updateRestaurantStatus(id, { approvalStatus: newStatus });
+    const res = await updateRestaurantStatus(convexUrl, id, { approvalStatus: newStatus });
     if (res?.success) await loadRestaurants();
     else alert("Erro: " + res?.error);
   }
 
   async function handleAddDays(id: string, currentEndDate: number | undefined, days: number) {
     if (confirm(`Adicionar ${days} dias de assinatura?`)) {
-      const res = await addSubscriptionDays(id, currentEndDate, days);
+      const res = await addSubscriptionDays(convexUrl, id, currentEndDate, days);
       if (res?.success) await loadRestaurants();
       else alert("Erro: " + res?.error);
     }
@@ -51,7 +53,7 @@ export default function SuperAdminPage() {
 
   async function handleDelete(id: string, name: string) {
     if (confirm(`Tem certeza que deseja DELETAR o restaurante ${name}? Isso apagará todos os itens e pedidos dele.`)) {
-      const res = await deleteRestaurant(id);
+      const res = await deleteRestaurant(convexUrl, id);
       if (res?.success) await loadRestaurants();
       else alert("Erro: " + res?.error);
     }
