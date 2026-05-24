@@ -173,3 +173,16 @@ export const setPreferenceId = mutation({
     });
   },
 });
+
+// Courier marks order as delivered
+export const markAsDeliveredCourier = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error("Order not found");
+    if (order.status === "out_for_delivery") {
+      await ctx.db.patch(args.orderId, { status: "delivered" });
+    }
+    return order;
+  },
+});

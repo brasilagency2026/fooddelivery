@@ -71,6 +71,22 @@ export function OrderCard({ order }: { order: Order }) {
     }
   }
 
+  function handleDispatchWhatsApp() {
+    const address = `${order.deliveryAddress.street}, ${order.deliveryAddress.number}${order.deliveryAddress.complement ? ` - ${order.deliveryAddress.complement}` : ""}, ${order.deliveryAddress.neighborhood}, ${order.deliveryAddress.city}`;
+    
+    const encodedAddress = encodeURIComponent(address);
+    const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    const wazeLink = `https://waze.com/ul?q=${encodedAddress}`;
+    
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const courierLink = `${baseUrl}/courier/deliver/${order._id}`;
+    
+    const text = `*NOVA ENTREGA* 🛵\n\n*Pedido:* ${displayOrderNumber}\n*Cliente:* ${order.customerName}\n*Telefone:* ${order.customerPhone}\n\n*Endereço:*\n${address}\n${order.deliveryAddress.reference ? `*Ref:* ${order.deliveryAddress.reference}\n` : ""}\n*Valor a cobrar:* ${order.paymentStatus === "paid" ? "PAGO ONLINE (Não cobrar)" : `R$ ${(order.totalAmount + order.deliveryFee).toFixed(2)}`}\n\n📍 *Navegar:*\nGoogle Maps: ${mapsLink}\nWaze: ${wazeLink}\n\n✅ *Após entregar, clique no link abaixo para baixar no sistema:*\n${courierLink}`;
+    
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, "_blank");
+  }
+
   return (
     <div
       className="glass-card overflow-hidden animate-slide-up"
@@ -157,25 +173,36 @@ export function OrderCard({ order }: { order: Order }) {
 
       {/* Actions */}
       {nextAction && (
-        <div className="px-4 pb-4 flex gap-2">
-          <button
-            onClick={handleStatusChange}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
-            style={{ background: nextAction.color, color: "white" }}
-          >
-            {loading ? "..." : nextAction.label}
-          </button>
-          {order.status === "pending" && (
+        <div className="px-4 pb-4 flex flex-col gap-2">
+          {order.status === "out_for_delivery" && (
             <button
-              onClick={handleCancel}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
-              style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}
+              onClick={handleDispatchWhatsApp}
+              className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
+              style={{ background: "#25D366", color: "white" }}
             >
-              Recusar
+              <Phone size={16} /> Enviar p/ Entregador (WhatsApp)
             </button>
           )}
+          <div className="flex gap-2 w-full">
+            <button
+              onClick={handleStatusChange}
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+              style={{ background: nextAction.color, color: "white" }}
+            >
+              {loading ? "..." : nextAction.label}
+            </button>
+            {order.status === "pending" && (
+              <button
+                onClick={handleCancel}
+                disabled={loading}
+                className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+                style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}
+              >
+                Recusar
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
