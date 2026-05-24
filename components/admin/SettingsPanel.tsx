@@ -249,35 +249,55 @@ export function SettingsPanel({ restaurant, ownerId }: { restaurant: Restaurant 
           Mercado Pago
         </h2>
         <p className="text-xs mb-4" style={{ color: "var(--color-text-muted)" }}>
-          Cole aqui o seu Access Token para receber os pagamentos diretamente na sua conta.
-          Encontre em{" "}
-          <a href="https://www.mercadopago.com.br/developers" target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-orange)" }}>
-            mercadopago.com.br/developers
-          </a>
+          Conecte sua conta do Mercado Pago para receber os pagamentos online automaticamente.
         </p>
-        <div className="relative">
-          <input
-            type={showToken ? "text" : "password"}
-            value={form.mercadoPagoAccessToken}
-            onChange={(e) => setForm((p) => ({ ...p, mercadoPagoAccessToken: e.target.value }))}
-            placeholder="APP_USR-xxxxxxxx..."
-            className="w-full pl-3 pr-10 py-2.5 rounded-xl text-sm outline-none font-mono"
-            style={{
-              background: "var(--color-surface-2)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "var(--color-orange)")}
-            onBlur={(e) => (e.target.style.borderColor = "var(--color-border)")}
-          />
+        
+        {restaurant.mercadoPagoAccessToken ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)" }}>
+              <div className="w-8 h-8 rounded-full bg-[#22c55e] flex items-center justify-center text-white font-bold">
+                ✓
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: "#22c55e" }}>Conta Conectada</p>
+                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>Pronto para receber pagamentos</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                const clientId = process.env.NEXT_PUBLIC_MP_CLIENT_ID;
+                if (!clientId) {
+                  alert("A configuração do Mercado Pago não está completa no servidor (Falta o NEXT_PUBLIC_MP_CLIENT_ID).");
+                  return;
+                }
+                const redirectUri = encodeURIComponent(`${window.location.origin}/api/mercadopago/callback`);
+                const mpUrl = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=${restaurant._id}&redirect_uri=${redirectUri}`;
+                window.location.href = mpUrl;
+              }}
+              className="text-xs font-semibold underline text-center opacity-70 hover:opacity-100"
+            >
+              Reconectar conta diferente
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={() => setShowToken(!showToken)}
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-            style={{ color: "var(--color-text-muted)" }}
+            onClick={() => {
+              const clientId = process.env.NEXT_PUBLIC_MP_CLIENT_ID;
+              if (!clientId) {
+                alert("A configuração do Mercado Pago não está completa no servidor (Falta o NEXT_PUBLIC_MP_CLIENT_ID).");
+                return;
+              }
+              const redirectUri = encodeURIComponent(`${window.location.origin}/api/mercadopago/callback`);
+              const mpUrl = `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=${restaurant._id}&redirect_uri=${redirectUri}`;
+              window.location.href = mpUrl;
+            }}
+            className="w-full py-3 rounded-xl text-sm font-bold transition-all"
+            style={{ background: "#009ee3", color: "white" }}
           >
-            {showToken ? <EyeOff size={15} /> : <Eye size={15} />}
+            Conectar com Mercado Pago
           </button>
-        </div>
+        )}
       </section>
 
       {/* Share & QR Code */}
