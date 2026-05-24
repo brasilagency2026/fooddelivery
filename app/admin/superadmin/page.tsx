@@ -126,9 +126,16 @@ export default function SuperAdminPage() {
                         )}
                         
                         {rest.ownerEmail && rest.ownerEmail !== "N/A" ? (
-                          <a href={`mailto:${rest.ownerEmail}?subject=Sua Assinatura Delivery Food Pronto`} className="p-1.5 bg-blue-500/10 text-blue-500 rounded-full hover:bg-blue-500/20 transition" title={`E-mail: ${rest.ownerEmail}`}>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(rest.ownerEmail);
+                              alert("E-mail copiado: " + rest.ownerEmail);
+                            }}
+                            className="p-1.5 bg-blue-500/10 text-blue-500 rounded-full hover:bg-blue-500/20 transition" 
+                            title={`Copiar E-mail: ${rest.ownerEmail}`}
+                          >
                             <Mail size={16} />
-                          </a>
+                          </button>
                         ) : (
                           <span className="p-1.5 bg-[var(--color-surface-2)] text-[var(--color-text-muted)] rounded-full opacity-50" title="Sem e-mail">
                             <Mail size={16} />
