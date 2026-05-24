@@ -135,28 +135,54 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
 
           {/* Location */}
           <div className="glass-card p-4">
-            <p className="text-sm font-semibold mb-1">Localização do restaurante *</p>
+            <p className="text-sm font-semibold mb-1">Localização do restaurante (GPS) *</p>
             <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
-              Usada para calcular a distância até os clientes. Certifique-se de estar no local do restaurante.
+              Você pode capturar sua localização atual ou digitar manualmente as coordenadas (Latitude/Longitude).
             </p>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1">
+                <label className="block text-[10px] uppercase mb-1" style={{ color: "var(--color-text-muted)" }}>Latitude</label>
+                <input
+                  type="number"
+                  value={form.latitude || ""}
+                  onChange={(e) => {
+                    setForm(p => ({ ...p, latitude: parseFloat(e.target.value) || 0 }));
+                    setLocationOk(true);
+                  }}
+                  placeholder="-23.5505"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[10px] uppercase mb-1" style={{ color: "var(--color-text-muted)" }}>Longitude</label>
+                <input
+                  type="number"
+                  value={form.longitude || ""}
+                  onChange={(e) => {
+                    setForm(p => ({ ...p, longitude: parseFloat(e.target.value) || 0 }));
+                    setLocationOk(true);
+                  }}
+                  placeholder="-46.6333"
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                  style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+                />
+              </div>
+            </div>
+
             <button
               onClick={getLocation}
               disabled={gettingLocation}
-              className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl font-medium transition-all"
-              style={
-                locationOk
-                  ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
-                  : { background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }
-              }
+              className="flex items-center justify-center gap-2 text-sm px-4 py-2 rounded-xl font-medium transition-all w-full"
+              style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
             >
               {gettingLocation ? (
                 <Loader2 size={15} className="animate-spin" />
               ) : (
-                <MapPin size={15} style={{ color: locationOk ? "#22c55e" : "var(--color-orange)" }} />
+                <MapPin size={15} style={{ color: "var(--color-orange)" }} />
               )}
-              {locationOk
-                ? `✓ Localização capturada (${form.latitude.toFixed(4)}, ${form.longitude.toFixed(4)})`
-                : "Capturar minha localização"}
+              Capturar minha localização atual via GPS
             </button>
           </div>
 
