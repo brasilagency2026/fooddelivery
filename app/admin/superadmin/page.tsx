@@ -26,7 +26,7 @@ export default function SuperAdminPage() {
         setError(res.error || "Erro desconhecido");
         return;
       }
-      setRestaurants(res.data);
+      setRestaurants(res.data || []);
     } catch (err: any) {
       setError(err.message || "Unauthorized or error loading data");
     } finally {
