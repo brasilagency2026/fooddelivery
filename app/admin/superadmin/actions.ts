@@ -1,18 +1,21 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { revalidatePath } from "next/cache";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const SUPER_ADMIN_EMAIL = "glwebagency2@gmail.com";
 
 async function checkSuperAdmin() {
-  const user = await currentUser();
-  if (!user) throw new Error("Unauthorized");
+  const { userId } = auth();
+  if (!userId) throw new Error("Unauthorized");
   
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
   const email = user.emailAddresses[0]?.emailAddress;
+  
   if (email !== SUPER_ADMIN_EMAIL) {
     throw new Error("Unauthorized: Not Super Admin");
   }
@@ -38,7 +41,18 @@ export async function fetchAllRestaurantsAdmin(convexUrl: string) {
     const data = await convex.query(api.admin.getAllRestaurantsAdmin, {
       adminSecret: getAdminSecret(),
     });
-    return { success: true, data };
+
+    const client = await clerkClient();
+    const enrichedData = await Promise.all(data.map(async (r: any) => {
+      try {
+        const user = await client.users.getUser(r.ownerId);
+        return { ...r, ownerEmail: user.emailAddresses[0]?.emailAddress };
+      } catch (e) {
+        return { ...r, ownerEmail: "N/A" };
+      }
+    }));
+
+    return { success: true, data: enrichedData };
   } catch (err: any) {
     console.error("[SuperAdmin Error]", err.message);
     return { success: false, error: err.message };

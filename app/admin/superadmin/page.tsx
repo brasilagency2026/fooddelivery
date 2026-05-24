@@ -9,6 +9,8 @@ import {
   addSubscriptionDays 
 } from "./actions";
 
+import { Mail, Phone } from "lucide-react";
+
 export default function SuperAdminPage() {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +90,7 @@ export default function SuperAdminPage() {
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 <th className="p-4 font-semibold text-sm">Restaurante</th>
+                <th className="p-4 font-semibold text-sm">Contato</th>
                 <th className="p-4 font-semibold text-sm">Status</th>
                 <th className="p-4 font-semibold text-sm">Assinatura</th>
                 <th className="p-4 font-semibold text-sm">Vencimento</th>
@@ -100,12 +103,38 @@ export default function SuperAdminPage() {
                 const isTrial = rest.subscriptionStatus === "trial";
                 const endDate = rest.subscriptionEndDate ? new Date(rest.subscriptionEndDate) : null;
                 const isExpired = endDate ? endDate.getTime() < Date.now() : true;
+                
+                const rawPhone = rest.phone ? rest.phone.replace(/\D/g, '') : '';
+                const whatsappLink = rawPhone ? `https://wa.me/55${rawPhone}` : '#';
 
                 return (
                   <tr key={rest._id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-2)]">
                     <td className="p-4">
                       <p className="font-bold">{rest.name}</p>
                       <p className="text-xs text-[var(--color-text-muted)]">{rest.city} - {rest.state}</p>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {rest.phone ? (
+                          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-green-500/10 text-green-500 rounded-full hover:bg-green-500/20 transition" title={`WhatsApp: ${rest.phone}`}>
+                            <Phone size={16} />
+                          </a>
+                        ) : (
+                          <span className="p-1.5 bg-[var(--color-surface-2)] text-[var(--color-text-muted)] rounded-full opacity-50" title="Sem WhatsApp">
+                            <Phone size={16} />
+                          </span>
+                        )}
+                        
+                        {rest.ownerEmail && rest.ownerEmail !== "N/A" ? (
+                          <a href={`mailto:${rest.ownerEmail}?subject=Sua Assinatura Delivery Food Pronto`} className="p-1.5 bg-blue-500/10 text-blue-500 rounded-full hover:bg-blue-500/20 transition" title={`E-mail: ${rest.ownerEmail}`}>
+                            <Mail size={16} />
+                          </a>
+                        ) : (
+                          <span className="p-1.5 bg-[var(--color-surface-2)] text-[var(--color-text-muted)] rounded-full opacity-50" title="Sem e-mail">
+                            <Mail size={16} />
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">
                       <button 
