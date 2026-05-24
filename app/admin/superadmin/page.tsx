@@ -1,0 +1,156 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { UserButton } from "@clerk/nextjs";
+import { 
+  fetchAllRestaurantsAdmin, 
+  updateRestaurantStatus, 
+  deleteRestaurant, 
+  addSubscriptionDays 
+} from "./actions";
+
+export default function SuperAdminPage() {
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadRestaurants();
+  }, []);
+
+  async function loadRestaurants() {
+    try {
+      setLoading(true);
+      const data = await fetchAllRestaurantsAdmin();
+      setRestaurants(data);
+    } catch (err: any) {
+      setError(err.message || "Unauthorized or error loading data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleApprove(id: string, currentStatus: string) {
+    const newStatus = currentStatus === "approved" ? "pending" : "approved";
+    await updateRestaurantStatus(id, { approvalStatus: newStatus });
+    await loadRestaurants();
+  }
+
+  async function handleAddDays(id: string, currentEndDate: number | undefined, days: number) {
+    if (confirm(`Adicionar ${days} dias de assinatura?`)) {
+      await addSubscriptionDays(id, currentEndDate, days);
+      await loadRestaurants();
+    }
+  }
+
+  async function handleDelete(id: string, name: string) {
+    if (confirm(`Tem certeza que deseja DELETAR o restaurante ${name}? Isso apagará todos os itens e pedidos dele.`)) {
+      await deleteRestaurant(id);
+      await loadRestaurants();
+    }
+  }
+
+  if (loading) {
+    return <div className="min-h-dvh flex items-center justify-center">Carregando painel de controle...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-4 text-center">
+        <h1 className="text-2xl font-bold text-red-500">Acesso Negado</h1>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-dvh bg-[var(--color-bg)] p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Super Admin</h1>
+            <p className="text-[var(--color-text-muted)] mt-1">Gerenciamento de Restaurantes e Assinaturas</p>
+          </div>
+          <UserButton />
+        </div>
+
+        <div className="glass-card overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-[var(--color-border)]">
+                <th className="p-4 font-semibold text-sm">Restaurante</th>
+                <th className="p-4 font-semibold text-sm">Status</th>
+                <th className="p-4 font-semibold text-sm">Assinatura</th>
+                <th className="p-4 font-semibold text-sm">Vencimento</th>
+                <th className="p-4 font-semibold text-sm text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {restaurants.map((rest) => {
+                const isApproved = rest.approvalStatus === "approved";
+                const isTrial = rest.subscriptionStatus === "trial";
+                const endDate = rest.subscriptionEndDate ? new Date(rest.subscriptionEndDate) : null;
+                const isExpired = endDate ? endDate.getTime() < Date.now() : true;
+
+                return (
+                  <tr key={rest._id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-2)]">
+                    <td className="p-4">
+                      <p className="font-bold">{rest.name}</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{rest.city} - {rest.state}</p>
+                    </td>
+                    <td className="p-4">
+                      <button 
+                        onClick={() => handleApprove(rest._id, rest.approvalStatus)}
+                        className={`px-3 py-1 text-xs font-bold rounded-full ${isApproved ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}
+                      >
+                        {isApproved ? "Aprovado" : "Pendente"}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${isTrial ? 'bg-purple-500/10 text-purple-500' : (isExpired ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500')}`}>
+                        {rest.subscriptionStatus === "trial" ? "Trial (Teste)" : "Ativo"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {endDate ? (
+                        <div className="flex flex-col">
+                          <span className={`text-sm font-semibold ${isExpired ? 'text-red-500' : ''}`}>
+                            {endDate.toLocaleDateString("pt-BR")}
+                          </span>
+                          {isExpired && <span className="text-xs text-red-500">Expirado</span>}
+                        </div>
+                      ) : "Sem data"}
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleAddDays(rest._id, rest.subscriptionEndDate, 30)}
+                          className="px-3 py-1.5 text-xs font-bold bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                          title="Adicionar 30 dias de assinatura"
+                        >
+                          +30 Dias
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(rest._id, rest.name)}
+                          className="px-3 py-1.5 text-xs font-bold bg-red-500 text-white rounded hover:bg-red-600 transition"
+                          title="Apagar Restaurante"
+                        >
+                          Deletar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {restaurants.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-[var(--color-text-muted)]">Nenhum restaurante encontrado.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

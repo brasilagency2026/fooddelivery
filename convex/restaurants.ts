@@ -164,6 +164,9 @@ export const createRestaurant = mutation({
       restaurantSlug,
       isOpen: false,
       approvalStatus: "approved", // Changed to approved for testing
+      subscriptionStatus: "trial",
+      subscriptionEndDate: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days trial
+      createdAt: Date.now(),
     });
   },
 });

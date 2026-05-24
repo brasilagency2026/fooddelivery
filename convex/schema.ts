@@ -22,6 +22,9 @@ export default defineSchema({
     citySlug: v.optional(v.string()), // e.g. "sao-paulo"
     restaurantSlug: v.optional(v.string()), // e.g. "pizza-pronto"
     currentOrderNumber: v.optional(v.number()), // Resets when opening
+    subscriptionStatus: v.optional(v.string()), // "trial" | "active" | "past_due" | "canceled"
+    subscriptionEndDate: v.optional(v.number()), // timestamp
+    createdAt: v.optional(v.number()),
   })
     .index("by_owner", ["ownerId"])
     .index("by_status", ["approvalStatus", "isOpen"])

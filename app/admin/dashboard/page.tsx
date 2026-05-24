@@ -9,18 +9,15 @@ import { OrderCard } from "@/components/order/OrderCard";
 import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { MenuManager } from "@/components/admin/MenuManager";
 import { RegisterRestaurant } from "@/components/admin/RegisterRestaurant";
+import SubscriptionCard from "@/components/admin/SubscriptionCard";
 import { LayoutDashboard, UtensilsCrossed, Settings, Power } from "lucide-react";
 import { useAudioNotification } from "@/hooks/useAudioNotification";
 import { useEffect, useRef } from "react";
 
-type Tab = "orders" | "menu" | "settings";
-
 export default function AdminDashboard() {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<Tab>("orders");
-
-  const { playSound, isAudioUnlocked, unlockAudio } = useAudioNotification();
-  const prevPendingCountRef = useRef<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"orders" | "menu" | "settings">("orders");
+  const { isAudioUnlocked, unlockAudio, playSound } = useAudioNotification();
 
   const restaurant = useQuery(
     api.restaurants.getMyRestaurant,
@@ -28,25 +25,35 @@ export default function AdminDashboard() {
   );
 
   const activeOrders = useQuery(
-    api.orders.getActiveOrders,
+    api.orders.getActiveOrdersAdmin,
     restaurant ? { restaurantId: restaurant._id } : "skip"
   );
-
-  const pendingCount = activeOrders?.filter((o: any) => o.status === "pending").length ?? 0;
-
+  
+  const pendingCount = activeOrders?.filter(o => o.status === "pending").length || 0;
+  
+  // Audio notification logic
+  const prevPendingCountRef = useRef(pendingCount);
   useEffect(() => {
-    if (activeOrders !== undefined) {
-      if (prevPendingCountRef.current !== null && pendingCount > prevPendingCountRef.current) {
-        playSound("newOrder");
-      }
-      prevPendingCountRef.current = pendingCount;
+    if (pendingCount > prevPendingCountRef.current && isAudioUnlocked) {
+      playSound("newOrder");
     }
-  }, [pendingCount, activeOrders, playSound]);
+    prevPendingCountRef.current = pendingCount;
+  }, [pendingCount, isAudioUnlocked, playSound]);
 
   const toggleOpen = useMutation(api.restaurants.toggleRestaurantOpen);
 
   async function handleToggle() {
     if (!restaurant || !user) return;
+    
+    // Check if subscription is expired before allowing to open
+    const endDate = restaurant.subscriptionEndDate ? new Date(restaurant.subscriptionEndDate) : null;
+    const isExpired = endDate ? endDate.getTime() < Date.now() : true;
+    
+    if (!restaurant.isOpen && isExpired && restaurant.subscriptionStatus !== "trial") {
+      alert("Sua assinatura expirou. Por favor, renove sua assinatura para abrir o restaurante.");
+      return;
+    }
+    
     await toggleOpen({ restaurantId: restaurant._id, ownerId: user.id });
   }
 
@@ -120,6 +127,15 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Subscription Alert/Card at the top of content */}
+      <div className="px-4 pt-4 max-w-2xl mx-auto w-full">
+        <SubscriptionCard 
+          subscriptionStatus={restaurant.subscriptionStatus} 
+          subscriptionEndDate={restaurant.subscriptionEndDate} 
+          restaurantName={restaurant.name} 
+        />
+      </div>
 
       {/* Tab nav */}
       <nav className="px-4 py-2 border-b" style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
