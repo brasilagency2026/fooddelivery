@@ -19,7 +19,11 @@ async function checkSuperAdmin() {
 }
 
 function getConvexClient() {
-  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  const url = process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!url) {
+    throw new Error("Server misconfiguration: CONVEX_URL is missing");
+  }
+  return new ConvexHttpClient(url);
 }
 
 function getAdminSecret() {

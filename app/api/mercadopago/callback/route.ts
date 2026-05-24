@@ -48,7 +48,13 @@ export async function GET(request: Request) {
     }
 
     // Save token in Convex
-    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+    // Use CONVEX_URL on server side, fallback to NEXT_PUBLIC_CONVEX_URL
+  const convexUrl = process.env.CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    return NextResponse.json({ error: "CONVEX_URL missing" }, { status: 500 });
+  }
+
+  const convex = new ConvexHttpClient(convexUrl);
     await convex.mutation(api.restaurants.saveMercadoPagoToken, {
       restaurantId: state as Id<"restaurants">,
       accessToken: data.access_token,
