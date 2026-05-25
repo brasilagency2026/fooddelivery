@@ -132,6 +132,24 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
         </span>
       </div>
 
+      {/* Category Navigation */}
+      {categories.length > 0 && (
+        <div className="sticky top-0 z-30 px-4 py-3 overflow-x-auto whitespace-nowrap hide-scrollbar border-b" style={{ background: "rgba(10,10,10,0.9)", backdropFilter: "blur(12px)", borderColor: "var(--color-border)" }}>
+          <div className="flex gap-3 max-w-xl mx-auto">
+            {categories.map((category: any) => (
+              <a
+                key={category}
+                href={`#cat-${category.replace(/\s+/g, '-').toLowerCase()}`}
+                className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors hover:bg-[var(--color-surface)]"
+                style={{ background: "var(--color-surface-2)", color: "var(--color-text)" }}
+              >
+                {category}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Menu */}
       <main className="max-w-xl mx-auto px-4">
         {!restaurant.isOpen && (
@@ -148,8 +166,8 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
           </div>
         )}
 
-        {categories.map((category) => (
-          <div key={category} className="mt-6">
+        {categories.map((category: any) => (
+          <div key={category} id={`cat-${category.replace(/\s+/g, '-').toLowerCase()}`} className="mt-6 scroll-mt-20">
             <h2 className="font-bold text-sm uppercase tracking-wider mb-3" style={{ color: "var(--color-text-muted)" }}>
               {category}
             </h2>
