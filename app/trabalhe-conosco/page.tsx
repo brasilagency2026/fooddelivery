@@ -23,16 +23,24 @@ export default function TrabalheConoscoPage() {
       answer: "As comissões são pagas mensalmente diretamente na sua conta bancária ou Mercado Pago cadastrada, sempre que o cliente renovar a assinatura."
     },
     {
+      question: "Quando começo a receber?",
+      answer: "A comissão começa a ser paga após o período de teste gratuito de 30 dias do restaurante, assim que ele realizar o primeiro pagamento da assinatura."
+    },
+    {
+      question: "Como faço para me inscrever?",
+      answer: "Basta clicar em 'Quero começar' ou 'Tornar-se Parceiro', preencher seus dados básicos e você receberá acesso ao seu link exclusivo e painel de controle."
+    },
+    {
+      question: "Quais são as minhas obrigações?",
+      answer: "Nenhuma! Você não tem metas de vendas mínimas, horários ou exclusividade. Você trabalha quando e onde quiser, indicando nossa plataforma de delivery para seus contatos."
+    },
+    {
       question: "Preciso pagar algo para ser parceiro?",
       answer: "Não! O programa de parceiros é 100% gratuito. Você não paga nada para se cadastrar ou para começar a vender."
     },
     {
-      question: "Tem limite de indicações?",
-      answer: "Não há limite! Quanto mais clientes você indicar, mais você ganha. O céu é o limite para as suas comissões recorrentes."
-    },
-    {
       question: "Como o cliente sabe que fui eu que indiquei?",
-      answer: "Você receberá um link exclusivo e um cupom de desconto. Quando o restaurante se cadastrar usando seu link ou cupom, o sistema atrela a conta dele à sua."
+      answer: "Você receberá um link exclusivo e um voucher de 10% de desconto. Quando o restaurante se cadastrar usando seu link ou voucher, o sistema atrela a conta dele à sua."
     }
   ];
 
@@ -61,7 +69,7 @@ export default function TrabalheConoscoPage() {
             <span style={{ color: "#22c55e" }}>Ganhe 50% todo mês.</span>
           </h1>
           <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
-            Seja do nosso programa de parceiros e ganhe comissões recorrentes indicando bares, restaurantes, food trucks e quiosques.
+            Seja do nosso programa de parceiros e ganhe comissões recorrentes indicando exclusivamente restaurantes e estabelecimentos que fazem <strong>Delivery</strong>.
           </p>
           <a 
             href="#cadastro" 
@@ -77,7 +85,7 @@ export default function TrabalheConoscoPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-24 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           {[
             { icon: DollarSign, title: "50% do que o cliente paga", desc: "Receba comissões recorrentes todos os meses enquanto o cliente estiver ativo." },
-            { icon: Gift, title: "Voucher de desconto", desc: "Ofereça vantagens exclusivas para ajudar a fechar suas vendas mais rápido." },
+            { icon: Gift, title: "Voucher de 10% para seu cliente", desc: "Ofereça vantagens exclusivas com 10% de desconto para ajudar a fechar suas vendas mais rápido." },
             { icon: Users, title: "Painel exclusivo", desc: "Acompanhe seus indicados, pagamentos e comissões em tempo real." },
             { icon: Shield, title: "Suporte dedicado", desc: "Material de vendas e suporte para ajudar você a prospectar e vender." }
           ].map((item, i) => (
