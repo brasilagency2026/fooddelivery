@@ -72,9 +72,15 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
     router.push("/checkout");
   };
 
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
   const categories = menuItems
     ? [...new Set(menuItems.map((i: any) => i.category || "Cardápio"))]
     : [];
+
+  const displayedCategories = activeCategory 
+    ? categories.filter(c => c === activeCategory)
+    : categories;
 
   if (restaurant === undefined) {
     return (
@@ -136,15 +142,28 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
       {categories.length > 0 && (
         <div className="sticky top-0 z-30 px-4 py-3 overflow-x-auto whitespace-nowrap hide-scrollbar border-b" style={{ background: "rgba(10,10,10,0.9)", backdropFilter: "blur(12px)", borderColor: "var(--color-border)" }}>
           <div className="flex gap-3 max-w-xl mx-auto">
+            <button
+              onClick={() => setActiveCategory(null)}
+              className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors"
+              style={{ 
+                background: activeCategory === null ? "var(--color-orange)" : "var(--color-surface-2)", 
+                color: activeCategory === null ? "#fff" : "var(--color-text)" 
+              }}
+            >
+              Todos
+            </button>
             {categories.map((category: any) => (
-              <a
+              <button
                 key={category}
-                href={`#cat-${category.replace(/\s+/g, '-').toLowerCase()}`}
+                onClick={() => setActiveCategory(category)}
                 className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors hover:bg-[var(--color-surface)]"
-                style={{ background: "var(--color-surface-2)", color: "var(--color-text)" }}
+                style={{ 
+                  background: activeCategory === category ? "var(--color-orange)" : "var(--color-surface-2)", 
+                  color: activeCategory === category ? "#fff" : "var(--color-text)" 
+                }}
               >
                 {category}
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -166,7 +185,7 @@ export default function RestaurantePage({ params }: { params: { estado: string, 
           </div>
         )}
 
-        {categories.map((category: any) => (
+        {displayedCategories.map((category: any) => (
           <div key={category} id={`cat-${category.replace(/\s+/g, '-').toLowerCase()}`} className="mt-6 scroll-mt-20">
             <h2 className="font-bold text-sm uppercase tracking-wider mb-3" style={{ color: "var(--color-text-muted)" }}>
               {category}
