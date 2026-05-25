@@ -149,6 +149,42 @@ export default function TrabalheConoscoPage() {
           </div>
         </div>
 
+        {/* Legal Requirements / MEI */}
+        <div className="p-8 md:p-10 rounded-3xl mb-24 animate-slide-up relative overflow-hidden" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,165,0,0.3)" }}>
+          <div className="absolute top-0 left-0 w-full h-1" style={{ background: "linear-gradient(to right, #ffa500, #ff8c00)" }}></div>
+          
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <span className="text-xl">📄</span> Parceria formal com contrato de prestação de serviços
+              </h2>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+                Para ser parceiro comercial do Food Pronto, é <strong>obrigatório ter um CNPJ ativo</strong>. Após a aprovação, enviamos um contrato de prestação de serviços para assinatura digital.
+              </p>
+              <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.7)" }}>
+                Não tem CNPJ ainda? Recomendamos a abertura de uma MEI — gratuito, 100% online e leva menos de 10 minutos.
+              </p>
+              <a 
+                href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors hover:underline"
+              >
+                🔗 Abrir minha MEI no portal do governo (gratuito)
+              </a>
+            </div>
+            
+            <div className="flex-1 p-6 rounded-2xl" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <p className="text-xs uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.5)" }}>CNAE recomendado para MEI</p>
+              <div className="text-3xl font-bold mb-2 text-orange-400 tracking-tight">7490-1/04</div>
+              <p className="text-sm font-semibold mb-3">Atividades de intermediação e agenciamento de serviços e negócios em geral</p>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+                Este CNAE enquadra perfeitamente a atividade de representante comercial que indica e intermedia contratos de serviços de tecnologia como o Food Pronto.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* How it works */}
         <div className="mb-24 animate-slide-up">
           <h2 className="text-3xl font-bold mb-12 text-center">Como funciona?</h2>
