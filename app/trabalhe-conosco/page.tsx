@@ -28,7 +28,7 @@ export default function TrabalheConoscoPage() {
     },
     {
       question: "Como faço para me inscrever?",
-      answer: "Basta clicar em 'Quero começar' ou 'Tornar-se Parceiro', preencher seus dados básicos e você receberá acesso ao seu link exclusivo e painel de controle."
+      answer: "Basta clicar nos botões 'Quero começar' ou 'Tornar-se Parceiro' para falar diretamente com a nossa equipe no WhatsApp. Nós faremos o seu cadastro na hora e enviaremos seu link!"
     },
     {
       question: "Quais são as minhas obrigações?",
@@ -72,7 +72,9 @@ export default function TrabalheConoscoPage() {
             Seja do nosso programa de parceiros e ganhe comissões recorrentes indicando exclusivamente restaurantes e estabelecimentos que fazem <strong>Delivery</strong>.
           </p>
           <a 
-            href="#cadastro" 
+            href="https://wa.me/5513982032534?text=Ol%C3%A1!%20Tenho%20interesse%20em%20ser%20um%20parceiro%20comercial%20do%20Food%20Pronto." 
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105"
             style={{ background: "#22c55e", color: "#000", boxShadow: "0 10px 30px -10px rgba(34, 197, 94, 0.5)" }}
           >
@@ -236,10 +238,12 @@ export default function TrabalheConoscoPage() {
         <div id="cadastro" className="text-center p-12 rounded-3xl animate-slide-up" style={{ background: "linear-gradient(145deg, rgba(34,197,94,0.1) 0%, rgba(0,0,0,0) 100%)", border: "1px solid rgba(34,197,94,0.2)" }}>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Pronto para começar a ganhar comissão?</h2>
           <p className="text-lg mb-8" style={{ color: "rgba(255,255,255,0.7)" }}>
-            Crie sua conta agora, pegue seu link e faça sua primeira venda hoje mesmo.
+            Fale com nossa equipe agora, pegue seu link e faça sua primeira venda hoje mesmo.
           </p>
           <a 
-            href="/contato" 
+            href="https://wa.me/5513982032534?text=Ol%C3%A1!%20Tenho%20interesse%20em%20ser%20um%20parceiro%20comercial%20do%20Food%20Pronto." 
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105"
             style={{ background: "#22c55e", color: "#000", boxShadow: "0 10px 30px -10px rgba(34, 197, 94, 0.5)" }}
           >
