@@ -174,6 +174,8 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs mt-1">
             <a href="/quem-somos" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Quem Somos</a>
             <span style={{ color: "var(--color-border)" }}>•</span>
+            <a href="/trabalhe-conosco" className="hover:underline text-[var(--color-orange)] font-bold">Trabalhe Conosco</a>
+            <span style={{ color: "var(--color-border)" }}>•</span>
             <a href="/contato" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Contato</a>
             <span style={{ color: "var(--color-border)" }}>•</span>
             <a href="/admin/login" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Área do Restaurante</a>
