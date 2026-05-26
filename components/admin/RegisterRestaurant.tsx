@@ -19,6 +19,7 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
     estimatedTimeMinutes: 40,
     latitude: 0,
     longitude: 0,
+    affiliateVoucher: "",
   });
   const [gettingLocation, setGettingLocation] = useState(false);
   const [locationOk, setLocationOk] = useState(false);
@@ -58,6 +59,7 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
         deliveryRadiusKm: form.deliveryRadiusKm,
         deliveryFee: form.deliveryFee,
         estimatedTimeMinutes: form.estimatedTimeMinutes,
+        affiliateVoucher: form.affiliateVoucher || undefined,
       });
     } finally {
       setSaving(false);
@@ -71,6 +73,7 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
     { label: "Cidade *", key: "city", placeholder: "Ex: São Paulo" },
     { label: "Tipo de culinária", key: "cuisine", placeholder: "Ex: Hambúrgueres, Pizza, Japonesa..." },
     { label: "WhatsApp do restaurante", key: "phone", placeholder: "(11) 99999-9999" },
+    { label: "Código do Parceiro / Voucher (Opcional)", key: "affiliateVoucher", placeholder: "Ex: FOOD50" },
   ];
 
   return (

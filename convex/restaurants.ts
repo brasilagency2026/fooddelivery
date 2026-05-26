@@ -134,6 +134,7 @@ export const createRestaurant = mutation({
     imageUrl: v.optional(v.string()),
     state: v.string(),
     city: v.string(),
+    affiliateVoucher: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { city, ...rest } = args;

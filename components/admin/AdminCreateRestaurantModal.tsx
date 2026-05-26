@@ -18,6 +18,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
     estimatedTimeMinutes: 40,
     latitude: 0,
     longitude: 0,
+    affiliateVoucher: "",
   });
   const [gettingLocation, setGettingLocation] = useState(false);
   const [locationOk, setLocationOk] = useState(false);
@@ -60,6 +61,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
         deliveryRadiusKm: form.deliveryRadiusKm,
         deliveryFee: form.deliveryFee,
         estimatedTimeMinutes: form.estimatedTimeMinutes,
+        affiliateVoucher: form.affiliateVoucher || undefined,
       });
       
       onSuccess();
@@ -77,6 +79,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
     { label: "Cidade *", key: "city", placeholder: "Ex: São Paulo" },
     { label: "Tipo de culinária", key: "cuisine", placeholder: "Ex: Hambúrgueres, Pizza, Japonesa..." },
     { label: "WhatsApp do restaurante", key: "phone", placeholder: "(11) 99999-9999" },
+    { label: "Código do Parceiro / Voucher (Opcional)", key: "affiliateVoucher", placeholder: "Ex: FOOD50" },
   ];
 
   return (

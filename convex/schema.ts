@@ -25,11 +25,13 @@ export default defineSchema({
     subscriptionStatus: v.optional(v.string()), // "trial" | "active" | "past_due" | "canceled"
     subscriptionEndDate: v.optional(v.number()), // timestamp
     transferToken: v.optional(v.string()), // Used for ownership transfer
+    affiliateVoucher: v.optional(v.string()), // Used to track commercial affiliates
     createdAt: v.optional(v.number()),
   })
     .index("by_owner", ["ownerId"])
     .index("by_status", ["approvalStatus", "isOpen"])
-    .index("by_slug", ["state", "citySlug", "restaurantSlug"]),
+    .index("by_slug", ["state", "citySlug", "restaurantSlug"])
+    .index("by_affiliate", ["affiliateVoucher"]),
 
   menuItems: defineTable({
     restaurantId: v.id("restaurants"),
