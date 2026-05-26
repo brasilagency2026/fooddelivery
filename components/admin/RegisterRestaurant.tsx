@@ -92,7 +92,7 @@ export function RegisterRestaurant({ ownerId }: { ownerId: string }) {
         state: form.state,
         city: form.city,
         cuisine: form.cuisine || undefined,
-        phone: form.phone || undefined,
+        phone: form.phone,
         latitude: form.latitude,
         longitude: form.longitude,
         deliveryRadiusKm: form.deliveryRadiusKm,
