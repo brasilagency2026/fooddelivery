@@ -49,6 +49,12 @@ export default function SuperAdminPage() {
     else alert("Erro: " + res?.error);
   }
 
+  async function handleToggleOpen(id: string, currentIsOpen: boolean) {
+    const res = await updateRestaurantStatus(convexUrl, id, { isOpen: !currentIsOpen });
+    if (res?.success) await loadRestaurants();
+    else alert("Erro: " + res?.error);
+  }
+
   async function handleAddDays(id: string, currentEndDate: number | undefined, days: number) {
     if (confirm(`Adicionar ${days} dias de assinatura?`)) {
       const res = await addSubscriptionDays(convexUrl, id, currentEndDate, days);
@@ -217,12 +223,20 @@ export default function SuperAdminPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <button 
-                          onClick={() => handleApprove(rest._id, rest.approvalStatus)}
-                          className={`px-3 py-1 text-xs font-bold rounded-full ${isApproved ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}
-                        >
-                          {isApproved ? "Aprovado" : "Pendente"}
-                        </button>
+                        <div className="flex flex-col gap-2 items-start">
+                          <button 
+                            onClick={() => handleApprove(rest._id, rest.approvalStatus)}
+                            className={`px-3 py-1 text-xs font-bold rounded-full ${isApproved ? 'bg-green-500/10 text-green-500' : 'bg-orange-500/10 text-orange-500'}`}
+                          >
+                            {isApproved ? "Aprovado" : "Pendente"}
+                          </button>
+                          <button 
+                            onClick={() => handleToggleOpen(rest._id, rest.isOpen)}
+                            className={`px-3 py-1 text-xs font-bold rounded-full ${rest.isOpen ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}
+                          >
+                            {rest.isOpen ? "Aberto" : "Fechado"}
+                          </button>
+                        </div>
                       </td>
                       <td className="p-4">
                         <span className={`px-3 py-1 text-xs font-bold rounded-full ${isTrial ? 'bg-purple-500/10 text-purple-500' : (isExpired ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500')}`}>
