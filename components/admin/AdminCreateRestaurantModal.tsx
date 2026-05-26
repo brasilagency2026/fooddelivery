@@ -81,7 +81,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
   }
 
   async function handleSubmit() {
-    if (!form.name || !form.state || !form.city || !locationOk) return;
+    if (!form.name || !form.state || !form.city || !form.phone || !locationOk) return;
     setSaving(true);
     try {
       // Use a special owner ID for unassigned restaurants
@@ -117,7 +117,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
     { label: "Estado (UF) *", key: "state", placeholder: "Ex: SP" },
     { label: "Cidade *", key: "city", placeholder: "Ex: São Paulo" },
     { label: "Tipo de culinária", key: "cuisine", placeholder: "Ex: Hambúrgueres, Pizza, Japonesa..." },
-    { label: "WhatsApp do restaurante", key: "phone", placeholder: "(11) 99999-9999" },
+    { label: "WhatsApp do restaurante *", key: "phone", placeholder: "(11) 99999-9999" },
     { label: "Código do Parceiro / Voucher (Opcional)", key: "affiliateVoucher", placeholder: "Ex: FOOD50" },
   ];
 
@@ -214,7 +214,7 @@ export function AdminCreateRestaurantModal({ onClose, onSuccess }: { onClose: ()
 
           <button
             onClick={handleSubmit}
-            disabled={!form.name || !form.state || !form.city || !form.description || !locationOk || saving}
+            disabled={!form.name || !form.state || !form.city || !form.phone || !form.description || !locationOk || saving}
             className="btn-orange flex items-center justify-center gap-2 mt-4 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : "Criar Restaurante"}

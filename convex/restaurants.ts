@@ -130,7 +130,7 @@ export const createRestaurant = mutation({
     deliveryFee: v.number(),
     estimatedTimeMinutes: v.number(),
     cuisine: v.optional(v.string()),
-    phone: v.optional(v.string()),
+    phone: v.string(),
     imageUrl: v.optional(v.string()),
     state: v.string(),
     city: v.string(),
