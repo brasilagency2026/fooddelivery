@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, Smartphone, Store, Truck, Umbrella } from "lucide-react";
+import { ArrowLeft, CheckCircle2, QrCode, Smartphone, Store, Truck, Umbrella } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -29,6 +29,13 @@ export default function QuemSomosPage() {
       icon: Truck,
       description: "A plataforma completa para gerenciar o delivery do seu restaurante. Catálogo digital, cálculo de taxa de entrega, e gestão de pedidos simplificada para você vender mais.",
       color: "from-red-500 to-rose-400"
+    },
+    {
+      title: "Cardápio Digital & Gestão",
+      url: "cardapio.foodpronto.com.br",
+      icon: QrCode,
+      description: "Menu digital com QR Code, NFC e link direto + gestão completa de mesas, comandas, cozinha (KDS) e relatórios de vendas.",
+      color: "from-purple-500 to-violet-400"
     }
   ];
 
@@ -67,7 +74,7 @@ export default function QuemSomosPage() {
             <div>
               <h2 className="text-xl font-bold mb-3 text-[var(--color-text)]">Tudo via Mercado Pago</h2>
               <p style={{ color: "var(--color-text-muted)" }}>
-                Chega de complicações. Nossas 3 aplicações são integradas a uma única conta Mercado Pago, 
+                Chega de complicações. Nossas 4 aplicações são integradas a uma única conta Mercado Pago, 
                 garantindo que você receba os pagamentos digitais dos seus clientes de forma segura e com o 
                 dinheiro caindo direto na sua conta, sem intermediários segurando seu fluxo de caixa.
               </p>
