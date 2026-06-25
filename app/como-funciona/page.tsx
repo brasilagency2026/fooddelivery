@@ -101,7 +101,7 @@ export default function ComoFuncionaPage() {
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-              Isso ajuda o cliente a escolher com confiança, sem mostrar a rota do motoboy.
+              No painel de administração, você pode enviar o link ou imprimir o QR code do restaurante para sua comunicação de marketing, deixando o cliente acessar direto o cardápio e pedir sem complicação.
             </p>
           </div>
         </section>
