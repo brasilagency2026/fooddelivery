@@ -6,13 +6,13 @@ import { ClerkProvider } from "@clerk/nextjs";
 export const metadata: Metadata = {
   metadataBase: new URL("https://delivery.foodpronto.com.br"),
   title: "Food Pronto Delivery",
-  description: "Peça comida dos melhores restaurantes perto de você",
+  description: "Encontre restaurantes próximos e peça comida online com entrega rápida e segura.",
   manifest: "/manifest.json",
   themeColor: "#0A0A0A",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   openGraph: {
     title: "Food Pronto Delivery",
-    description: "Peça comida dos melhores restaurantes perto de você",
+    description: "Encontre restaurantes próximos e peça comida online com entrega rápida e segura.",
     url: "https://delivery.foodpronto.com.br",
     siteName: "Food Pronto Delivery",
     images: [
