@@ -29,7 +29,7 @@ export default function ComoFuncionaPage() {
             Configure seu restaurante, aceite pedidos online, receba pagamentos via Mercado Pago e conecte seus motoboys pelo WhatsApp com apenas alguns cliques.
           </p>
           <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-            O portal é geolocalizado: seus clientes veem os entregadores mais próximos em um mapa e também em uma lista ordenada por distância.
+            O portal é geolocalizado: seus clientes veem onde o restaurante está no mapa e também têm uma lista com os estabelecimentos mais próximos.
           </p>
           <p className="mt-6 text-base font-semibold" style={{ color: "var(--color-orange)" }}>
             Sem risco: os primeiros 30 dias são gratuitos. Depois, a mensalidade é de apenas R$ 150.
