@@ -96,12 +96,12 @@ export default function ComoFuncionaPage() {
               <div>
                 <h2 className="text-xl font-bold">Portal geolocalizado</h2>
                 <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  Cliente e motoboy veem o status da entrega com mapa e lista de opções mais próximas.
+                  O cliente vê onde o restaurante está no mapa e também tem uma lista dos estabelecimentos mais próximos.
                 </p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-              Seus clientes escolhem o delivery mais próximo e acompanham a rota em tempo real para maior transparência.
+              Isso ajuda o cliente a escolher com confiança, sem mostrar a rota do motoboy.
             </p>
           </div>
         </section>
