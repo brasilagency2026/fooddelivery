@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RestaurantCard } from "@/components/restaurant/RestaurantCard";
@@ -74,13 +75,22 @@ export default function HomePage() {
                 <span style={{ color: "var(--color-text)" }}> Delivery</span>
               </h1>
             </div>
-            <button
-              onClick={() => window.location.href = "/admin/login"}
-              className="text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: "var(--color-surface-2)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
-            >
-              Sou restaurante
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/como-funciona"
+                className="text-xs px-3 py-1.5 rounded-lg font-medium border border-transparent hover:border-[var(--color-border)] transition"
+                style={{ background: "var(--color-surface-2)", color: "var(--color-text-muted)" }}
+              >
+                Como Funciona
+              </Link>
+              <button
+                onClick={() => window.location.href = "/admin/login"}
+                className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: "var(--color-surface-2)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
+              >
+                Sou restaurante
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -103,6 +113,19 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-xl mx-auto px-4 pb-24">
+        <div className="mt-6 mb-6 rounded-3xl p-4 text-center border border-[var(--color-border)]" style={{ background: "var(--color-surface)", boxShadow: "0 0 0 1px rgba(255,255,255,0.02)" }}>
+          <p className="text-sm font-semibold mb-3" style={{ color: "var(--color-orange)" }}>
+            Descubra como o Food Pronto Delivery deixa seu restaurante pronto para vender mais
+          </p>
+          <Link
+            href="/como-funciona"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition-transform hover:-translate-y-0.5"
+            style={{ background: "var(--color-orange)", color: "white" }}
+          >
+            Ver como funciona
+          </Link>
+        </div>
+
         {/* Location permission UI */}
         {locationError && (
           <div className="mt-6">
@@ -173,6 +196,8 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs mt-1">
             <a href="/quem-somos" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Quem Somos</a>
+            <span style={{ color: "var(--color-border)" }}>•</span>
+            <a href="/como-funciona" className="hover:underline" style={{ color: "var(--color-text-muted)" }}>Como Funciona</a>
             <span style={{ color: "var(--color-border)" }}>•</span>
             <a href="/trabalhe-conosco" className="hover:underline text-[var(--color-orange)] font-bold">Trabalhe Conosco</a>
             <span style={{ color: "var(--color-border)" }}>•</span>

@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
+import type * as crons from "../crons.js";
 import type * as debug from "../debug.js";
+import type * as emails from "../emails.js";
 import type * as files from "../files.js";
 import type * as menuItems from "../menuItems.js";
 import type * as orders from "../orders.js";
@@ -22,7 +25,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
+  crons: typeof crons;
   debug: typeof debug;
+  emails: typeof emails;
   files: typeof files;
   menuItems: typeof menuItems;
   orders: typeof orders;
