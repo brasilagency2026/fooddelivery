@@ -28,6 +28,12 @@ export default function ComoFuncionaPage() {
           <p className="text-lg leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
             Configure seu restaurante, aceite pedidos online, receba pagamentos via Mercado Pago e conecte seus motoboys pelo WhatsApp com apenas alguns cliques.
           </p>
+          <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+            O portal é geolocalizado: seus clientes veem os entregadores mais próximos em um mapa e também em uma lista ordenada por distância.
+          </p>
+          <p className="mt-6 text-base font-semibold" style={{ color: "var(--color-orange)" }}>
+            Sem risco: os primeiros 30 dias são gratuitos. Depois, a mensalidade é de apenas R$ 150.
+          </p>
         </section>
 
         <section className="grid gap-6 md:grid-cols-2 mb-16">
@@ -88,14 +94,14 @@ export default function ComoFuncionaPage() {
                 <Shield size={24} />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Controle e segurança</h2>
+                <h2 className="text-xl font-bold">Portal geolocalizado</h2>
                 <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  Gerencie pedidos, entregas e pagamentos em um único painel, com relatórios claros.
+                  Cliente e motoboy veem o status da entrega com mapa e lista de opções mais próximas.
                 </p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-              Tenha transparência no fluxo de pedidos, acompanhe o status de cada entrega e reduza perdas operacionais.
+              Seus clientes escolhem o delivery mais próximo e acompanham a rota em tempo real para maior transparência.
             </p>
           </div>
         </section>
