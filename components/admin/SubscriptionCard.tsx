@@ -42,7 +42,9 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
 
       <div className="flex flex-col gap-4">
         <div>
-          <p className="text-sm text-[var(--color-text-muted)] mb-1">Vencimento do seu plano:</p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-1">
+            {isTrial && !isExpired ? "Seu período de teste gratuito expira em:" : "Vencimento do seu plano:"}
+          </p>
           <p className={`text-2xl font-bold ${isExpired ? "text-red-500" : ""}`}>
             {endDate ? endDate.toLocaleDateString("pt-BR") : "Data não definida"}
           </p>
@@ -51,6 +53,8 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
               <Clock size={14} className={isExpired ? "text-red-500" : "text-orange-400"} />
               {isExpired ? (
                 <span className="text-red-500">Seu plano expirou. O restaurante será pausado.</span>
+              ) : isTrial ? (
+                <span className="text-green-500 font-medium">🎉 Restam {daysRemaining} dias de teste gratuito</span>
               ) : (
                 <span className="text-[var(--color-text-muted)]">Restam {daysRemaining} dias</span>
               )}
@@ -58,7 +62,7 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
           )}
         </div>
 
-        {(isExpired || isExpiringSoon || isTrial) && (
+        {(isExpired || isExpiringSoon) && (
           <div className="pt-4 border-t border-[var(--color-border)] mt-2">
             <div className="flex items-start gap-3 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 mb-4">
               <AlertCircle size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
