@@ -4,10 +4,10 @@ import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Store, Loader2, CheckCircle2 } from "lucide-react";
 
-export default function ClaimPage() {
+function ClaimContent() {
   const { user, isLoaded, isSignedIn } = useUser();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -111,5 +111,17 @@ export default function ClaimPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ClaimPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh flex items-center justify-center bg-[var(--color-bg)]">
+        <Loader2 size={32} className="animate-spin text-[var(--color-orange)]" />
+      </div>
+    }>
+      <ClaimContent />
+    </Suspense>
   );
 }
