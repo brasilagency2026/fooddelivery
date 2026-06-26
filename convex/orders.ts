@@ -5,7 +5,7 @@ const deliveryAddressValidator = v.object({
   street: v.string(),
   number: v.string(),
   complement: v.optional(v.string()),
-  neighborhood: v.string(),
+  neighborhood: v.optional(v.string()),
   city: v.string(),
   reference: v.optional(v.string()),
   latitude: v.optional(v.number()),

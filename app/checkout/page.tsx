@@ -163,7 +163,6 @@ export default function CheckoutPage() {
       form.customerPhone.trim() &&
       form.street.trim() &&
       form.number.trim() &&
-      form.neighborhood.trim() &&
       form.city.trim()
     );
   }
@@ -182,7 +181,7 @@ export default function CheckoutPage() {
           street: form.street,
           number: form.number,
           complement: form.complement || undefined,
-          neighborhood: form.neighborhood,
+          neighborhood: form.neighborhood || undefined,
           city: form.city,
           reference: form.reference || undefined,
         },
@@ -361,7 +360,7 @@ export default function CheckoutPage() {
               <InputField label="Número" value={form.number} onChange={(v) => updateForm("number", v)} placeholder="123" required />
               <InputField label="Complemento" value={form.complement} onChange={(v) => updateForm("complement", v)} placeholder="Apto 4B" />
             </div>
-            <InputField label="Bairro" value={form.neighborhood} onChange={(v) => updateForm("neighborhood", v)} placeholder="Centro" required />
+            <InputField label="Bairro" value={form.neighborhood} onChange={(v) => updateForm("neighborhood", v)} placeholder="Centro" />
             <InputField label="Cidade" value={form.city} onChange={(v) => updateForm("city", v)} placeholder="São Paulo" required />
             <InputField
               label="Ponto de referência"
