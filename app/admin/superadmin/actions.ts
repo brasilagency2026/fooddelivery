@@ -9,7 +9,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 const SUPER_ADMIN_EMAIL = "glwebagency2@gmail.com";
 
 async function checkSuperAdmin() {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
   
   const client = await clerkClient();
