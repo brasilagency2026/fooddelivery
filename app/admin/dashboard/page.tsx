@@ -15,7 +15,7 @@ import { useAudioNotification } from "@/hooks/useAudioNotification";
 import { useEffect, useRef } from "react";
 
 export default function AdminDashboard() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState<"orders" | "menu" | "settings">("orders");
   const { isAudioUnlocked, unlockAudio, playSound } = useAudioNotification();
 
@@ -55,6 +55,14 @@ export default function AdminDashboard() {
     }
     
     await toggleOpen({ restaurantId: restaurant._id, ownerId: user.id });
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "var(--color-orange)", borderTopColor: "transparent" }} />
+      </div>
+    );
   }
 
   if (!user) return null;

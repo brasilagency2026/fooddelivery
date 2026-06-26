@@ -1,10 +1,25 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isAdminRoute = createRouteMatcher(["/admin/dashboard(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/admin/login(.*)",
+  "/admin/signup(.*)",
+  "/acompanhamento(.*)",
+  "/checkout(.*)",
+  "/contato(.*)",
+  "/quem-somos(.*)",
+  "/trabalhe-conosco(.*)",
+  "/meus-pedidos(.*)",
+  "/claim(.*)",
+  "/courier(.*)",
+  "/:estado/:cidade/:slug(.*)",
+  "/api(.*)",
+]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
-    auth().protect();
+    await auth.protect();
   }
 });
 
