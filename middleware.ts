@@ -20,7 +20,11 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
     const authObj = await auth();
-    authObj.protect();
+    if (!authObj.userId) {
+      const signInUrl = new URL("/admin/login", req.url);
+      signInUrl.searchParams.set("redirect_url", req.url);
+      return Response.redirect(signInUrl);
+    }
   }
 });
 
