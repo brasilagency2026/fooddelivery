@@ -158,12 +158,11 @@ export default function CheckoutPage() {
   }
 
   function isFormValid() {
-    return (
+    return Boolean(
       form.customerName.trim() &&
       form.customerPhone.trim() &&
       form.street.trim() &&
-      form.number.trim() &&
-      form.city.trim()
+      form.number.trim()
     );
   }
 
@@ -182,7 +181,7 @@ export default function CheckoutPage() {
           number: form.number,
           complement: form.complement || undefined,
           neighborhood: form.neighborhood || undefined,
-          city: form.city,
+          city: form.city || undefined,
           reference: form.reference || undefined,
         },
         items: cart.map((item) => ({

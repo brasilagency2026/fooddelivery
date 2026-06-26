@@ -61,7 +61,7 @@ export default defineSchema({
       number: v.string(),
       complement: v.optional(v.string()),
       neighborhood: v.optional(v.string()),
-      city: v.string(),
+      city: v.optional(v.string()),
       reference: v.optional(v.string()),
       latitude: v.optional(v.number()),
       longitude: v.optional(v.number()),
