@@ -45,10 +45,12 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
           <p className="text-sm text-[var(--color-text-muted)] mb-1">
             {isTrial && !isExpired ? "Seu período de teste gratuito expira em:" : "Vencimento do seu plano:"}
           </p>
-          <p className={`text-2xl font-bold ${isExpired ? "text-red-500" : ""}`}>
-            {endDate ? endDate.toLocaleDateString("pt-BR") : "Data não definida"}
+          <p className={`text-2xl font-bold ${isExpired && endDate ? "text-red-500" : ""}`}>
+            {endDate ? endDate.toLocaleDateString("pt-BR") : (
+              <span className="text-green-500 text-lg">Período de teste ativo</span>
+            )}
           </p>
-          {endDate && (
+          {endDate ? (
             <p className="text-sm flex items-center gap-1 mt-1">
               <Clock size={14} className={isExpired ? "text-red-500" : "text-orange-400"} />
               {isExpired ? (
@@ -58,6 +60,11 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
               ) : (
                 <span className="text-[var(--color-text-muted)]">Restam {daysRemaining} dias</span>
               )}
+            </p>
+          ) : (
+            <p className="text-sm flex items-center gap-1 mt-1">
+              <Clock size={14} className="text-green-500" />
+              <span className="text-green-500 font-medium">🎉 30 dias de teste gratuito incluídos</span>
             </p>
           )}
         </div>

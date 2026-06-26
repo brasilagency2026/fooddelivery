@@ -47,9 +47,11 @@ export default function AdminDashboard() {
     
     // Check if subscription is expired before allowing to open
     const endDate = restaurant.subscriptionEndDate ? new Date(restaurant.subscriptionEndDate) : null;
-    const isExpired = endDate ? endDate.getTime() < Date.now() : true;
+    const isExpired = endDate ? endDate.getTime() < Date.now() : false; // no date = not expired
+    const status = restaurant.subscriptionStatus;
     
-    if (!restaurant.isOpen && isExpired && restaurant.subscriptionStatus !== "trial") {
+    // Block only if explicitly expired AND not trial/active
+    if (!restaurant.isOpen && isExpired && status !== "trial" && status !== "active" && status != null) {
       alert("Sua assinatura expirou. Por favor, renove sua assinatura para abrir o restaurante.");
       return;
     }
