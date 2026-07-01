@@ -73,6 +73,7 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
     );
   }
 
+  const isAwaitingPayment = order.status === "awaiting_payment";
   const isCanceled = order.status === "canceled";
   const currentStepIndex = STATUS_STEPS.findIndex((s) => s.key === order.status);
   const isDelivered = order.status === "delivered";
@@ -84,10 +85,10 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
       {/* Header */}
       <header className="px-4 py-5 text-center" style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}>
         <div className="text-3xl mb-2">
-          {isCanceled ? "❌" : isDelivered ? "🎉" : "🛵"}
+          {isCanceled ? "❌" : isDelivered ? "🎉" : isAwaitingPayment ? "💳" : "🛵"}
         </div>
         <h1 className="font-bold text-xl mb-1">
-          {isCanceled ? "Pedido cancelado" : isDelivered ? "Pedido entregue!" : "Acompanhe seu pedido"}
+          {isCanceled ? "Pedido cancelado" : isDelivered ? "Pedido entregue!" : isAwaitingPayment ? "Aguardando pagamento" : "Acompanhe seu pedido"}
         </h1>
         <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
           Atualização em tempo real · Pedido {displayOrderNumber}
@@ -107,8 +108,21 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
           </div>
         )}
 
+        {/* Awaiting payment */}
+        {isAwaitingPayment && (
+          <section className="glass-card p-5 text-center">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 animate-pulse" style={{ background: "rgba(234,179,8,0.15)", border: "2px solid #eab308" }}>
+              <span className="text-2xl">💳</span>
+            </div>
+            <p className="font-semibold mb-1">Pagamento em processamento</p>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+              Assim que o pagamento for confirmado, seu pedido será enviado ao restaurante automaticamente.
+            </p>
+          </section>
+        )}
+
         {/* Status timeline */}
-        {!isCanceled && (
+        {!isCanceled && !isAwaitingPayment && (
           <section className="glass-card p-5">
             <div className="flex flex-col gap-0">
               {STATUS_STEPS.map((step, index) => {
@@ -164,8 +178,6 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
               })}
             </div>
           </section>
-        )}
-
         {isCanceled && (
           <section className="glass-card p-5 text-center">
             <XCircle size={40} className="mx-auto mb-3" style={{ color: "#ef4444" }} />

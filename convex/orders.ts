@@ -122,7 +122,7 @@ export const createOrder = mutation({
     return await ctx.db.insert("orders", {
       ...args,
       orderNumber: newOrderNumber,
-      status: "pending",
+      status: "awaiting_payment",
       paymentStatus: "pending",
       createdAt: Date.now(),
     });
@@ -154,9 +154,13 @@ export const updatePaymentStatus = mutation({
     );
     await ctx.db.patch(orderId, filteredUpdates);
 
-    // If payment is confirmed, also update order status
+    // If payment is confirmed, make order visible to restaurant
     if (args.paymentStatus === "paid") {
-      await ctx.db.patch(orderId, { status: "pending" }); // Awaiting restaurant confirmation
+      await ctx.db.patch(orderId, { status: "pending" });
+    }
+    // If payment failed/cancelled, mark order as canceled
+    if (args.paymentStatus === "failed") {
+      await ctx.db.patch(orderId, { status: "canceled" });
     }
   },
 });
