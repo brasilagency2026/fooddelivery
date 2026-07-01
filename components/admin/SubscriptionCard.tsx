@@ -19,8 +19,8 @@ export default function SubscriptionCard({ subscriptionStatus, subscriptionEndDa
     daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
-  const isExpired = daysRemaining <= 0;
-  const isExpiringSoon = daysRemaining > 0 && daysRemaining <= 5;
+  const isExpired = endDate ? daysRemaining <= 0 : false;
+  const isExpiringSoon = endDate ? (daysRemaining > 0 && daysRemaining <= 5) : false;
 
   const paymentLink = process.env.NEXT_PUBLIC_MP_SUBSCRIPTION_LINK || "https://wa.me/5535999999999?text=Quero%20renovar%20minha%20assinatura";
 
