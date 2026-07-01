@@ -174,13 +174,14 @@ export function OrderCard({ order }: { order: Order }) {
       {/* Actions */}
       {nextAction && (
         <div className="px-4 pb-4 flex flex-col gap-2">
-          {order.status === "out_for_delivery" && (
+          {/* Show WhatsApp dispatch button BEFORE marking as out_for_delivery */}
+          {order.status === "preparing" && (
             <button
               onClick={handleDispatchWhatsApp}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
               style={{ background: "#25D366", color: "white" }}
             >
-              <Phone size={16} /> Enviar p/ Entregador (WhatsApp)
+              <Phone size={16} /> Contatar Entregador (WhatsApp)
             </button>
           )}
           <div className="flex gap-2 w-full">
