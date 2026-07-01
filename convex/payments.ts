@@ -2,8 +2,117 @@ import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
-// Create a Mercado Pago payment preference
-// The payment goes directly to the restaurant's MP account
+// Get the restaurant's MP public key (needed for Payment Brick)
+export const getMpPublicKey = action({
+  args: { restaurantId: v.id("restaurants") },
+  handler: async (ctx, args): Promise<string> => {
+    const restaurant = await ctx.runQuery(api.restaurants.getRestaurant, {
+      restaurantId: args.restaurantId,
+    });
+    if (!restaurant?.mercadoPagoAccessToken) {
+      throw new Error("Restaurante não configurou pagamento");
+    }
+    // Fetch credentials from MP API to get the public_key
+    const response = await fetch("https://api.mercadopago.com/v1/account/credentials", {
+      headers: { Authorization: `Bearer ${restaurant.mercadoPagoAccessToken}` },
+    });
+    if (!response.ok) throw new Error("Erro ao obter credenciais MP");
+    const data = await response.json();
+    return data.public_key as string;
+  },
+});
+
+// Process a direct payment via Payment Brick token
+export const processPayment = action({
+  args: {
+    orderId: v.id("orders"),
+    restaurantId: v.id("restaurants"),
+    token: v.string(),           // card token from Brick
+    paymentMethodId: v.string(), // e.g. "visa", "pix"
+    installments: v.number(),
+    totalAmount: v.number(),
+    customerName: v.string(),
+    customerEmail: v.string(),
+    customerPhone: v.string(),
+    pixMethod: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args): Promise<any> => {
+    const restaurant = await ctx.runQuery(api.restaurants.getRestaurant, {
+      restaurantId: args.restaurantId,
+    });
+    if (!restaurant?.mercadoPagoAccessToken) {
+      throw new Error("Restaurante não configurou pagamento");
+    }
+
+    const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`;
+
+    const paymentBody: any = {
+      transaction_amount: args.totalAmount,
+      description: `Pedido - ${restaurant.name}`,
+      payment_method_id: args.paymentMethodId,
+      notification_url: notificationUrl,
+      external_reference: args.orderId,
+      payer: {
+        email: args.customerEmail,
+        first_name: args.customerName.split(" ")[0],
+        last_name: args.customerName.split(" ").slice(1).join(" ") || args.customerName.split(" ")[0],
+        phone: { area_code: args.customerPhone.slice(0, 2), number: args.customerPhone.slice(2) },
+      },
+      metadata: { order_id: args.orderId, restaurant_id: args.restaurantId },
+    };
+
+    if (args.pixMethod) {
+      // PIX — no token needed
+      paymentBody.payment_method_id = "pix";
+    } else {
+      // Card payment
+      paymentBody.token = args.token;
+      paymentBody.installments = args.installments;
+    }
+
+    const response = await fetch("https://api.mercadopago.com/v1/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${restaurant.mercadoPagoAccessToken}`,
+        "X-Idempotency-Key": args.orderId,
+      },
+      body: JSON.stringify(paymentBody),
+    });
+
+    const payment = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payment.message || "Erro ao processar pagamento");
+    }
+
+    const statusMap: Record<string, string> = {
+      approved: "paid",
+      rejected: "failed",
+      pending: "pending",
+      in_process: "pending",
+    };
+
+    const paymentStatus = statusMap[payment.status] || "pending";
+
+    await ctx.runMutation(api.orders.updatePaymentStatus, {
+      orderId: args.orderId,
+      paymentStatus,
+      mercadoPagoPaymentId: String(payment.id),
+    });
+
+    return {
+      status: payment.status,
+      paymentStatus,
+      paymentId: payment.id,
+      // For PIX: return QR code data
+      pixQrCode: payment.point_of_interaction?.transaction_data?.qr_code,
+      pixQrCodeBase64: payment.point_of_interaction?.transaction_data?.qr_code_base64,
+    };
+  },
+});
+
+// Create a Mercado Pago payment preference (kept as fallback)
 export const createPaymentPreference = action({
   args: {
     orderId: v.id("orders"),
@@ -26,7 +135,6 @@ export const createPaymentPreference = action({
     }),
   },
   handler: async (ctx, args): Promise<any> => {
-    // Get the restaurant's MP access token
     const restaurant = await ctx.runQuery(api.restaurants.getRestaurant, {
       restaurantId: args.restaurantId,
     });
@@ -38,7 +146,6 @@ export const createPaymentPreference = action({
 
     const accessToken = restaurant.mercadoPagoAccessToken;
 
-    // Build the preference payload
     const preferenceItems = args.items.map((item) => ({
       title: item.name,
       quantity: item.quantity,
@@ -46,7 +153,6 @@ export const createPaymentPreference = action({
       currency_id: "BRL",
     }));
 
-    // Add delivery fee as a line item if applicable
     if (args.deliveryFee > 0) {
       preferenceItems.push({
         title: "Taxa de Entrega",
@@ -67,9 +173,9 @@ export const createPaymentPreference = action({
       external_reference: args.orderId,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
       statement_descriptor: restaurant.name,
-      // Enable guest checkout (no MP account required)
       binary_mode: false,
       payment_methods: {
+        excluded_payment_types: [{ id: "ticket" }], // exclude boleto
         default_installments: 1,
       },
       metadata: {
@@ -78,7 +184,6 @@ export const createPaymentPreference = action({
       },
     };
 
-    // Call Mercado Pago API
     const response = await fetch(
       "https://api.mercadopago.com/checkout/preferences",
       {
@@ -93,14 +198,11 @@ export const createPaymentPreference = action({
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(
-        `Mercado Pago error: ${error.message || "Unknown error"}`
-      );
+      throw new Error(`Mercado Pago error: ${error.message || "Unknown error"}`);
     }
 
     const preference = await response.json();
 
-    // Save preference ID to the order
     await ctx.runMutation(api.orders.setPreferenceId, {
       orderId: args.orderId,
       preferenceId: preference.id,
@@ -108,8 +210,8 @@ export const createPaymentPreference = action({
 
     return {
       preferenceId: preference.id,
-      initPoint: preference.init_point, // Production URL
-      sandboxInitPoint: preference.sandbox_init_point, // Sandbox URL
+      initPoint: preference.init_point,
+      sandboxInitPoint: preference.sandbox_init_point,
     };
   },
 });
