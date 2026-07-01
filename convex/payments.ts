@@ -62,25 +62,24 @@ export const processPayment = action({
     const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`;
 
     const paymentBody: any = {
-      transaction_amount: args.totalAmount,
+      transaction_amount: Math.round(args.totalAmount * 100) / 100,
       description: `Pedido - ${restaurant.name}`,
-      payment_method_id: args.paymentMethodId,
       notification_url: notificationUrl,
       external_reference: args.orderId,
       payer: {
         email: args.customerEmail,
         first_name: args.customerName.split(" ")[0],
         last_name: args.customerName.split(" ").slice(1).join(" ") || args.customerName.split(" ")[0],
-        phone: { area_code: args.customerPhone.slice(0, 2), number: args.customerPhone.slice(2) },
       },
       metadata: { order_id: args.orderId, restaurant_id: args.restaurantId },
     };
 
     if (args.pixMethod) {
-      // PIX — no token needed
+      // PIX
       paymentBody.payment_method_id = "pix";
     } else {
       // Card payment
+      paymentBody.payment_method_id = args.paymentMethodId;
       paymentBody.token = args.token;
       paymentBody.installments = args.installments;
     }
@@ -98,7 +97,12 @@ export const processPayment = action({
     const payment = await response.json();
 
     if (!response.ok) {
-      throw new Error(payment.message || "Erro ao processar pagamento");
+      console.error("MP Payment error:", JSON.stringify(payment));
+      throw new Error(
+        payment.message || 
+        (payment.cause?.[0]?.description) || 
+        `Erro MP: ${response.status} - ${JSON.stringify(payment)}`
+      );
     }
 
     const statusMap: Record<string, string> = {
