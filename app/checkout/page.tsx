@@ -202,8 +202,9 @@ export default function CheckoutPage() {
       initialization: {
         amount: total,
         payer: {
+          entityType: "individual",
           firstName: form.customerName.split(" ")[0],
-          lastName: form.customerName.split(" ").slice(1).join(" "),
+          lastName: form.customerName.split(" ").slice(1).join(" ") || form.customerName.split(" ")[0],
           email: `${form.customerPhone.replace(/\D/g, "")}@cliente.foodpronto.com.br`,
           phone: { areaCode: form.customerPhone.slice(0, 2), number: form.customerPhone.slice(2) },
         },
