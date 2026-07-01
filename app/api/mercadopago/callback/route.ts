@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     await convex.mutation(api.restaurants.saveMercadoPagoToken, {
       restaurantId: state as Id<"restaurants">,
       accessToken: data.access_token,
+      publicKey: data.public_key || undefined,
     });
 
     // Redirect back to dashboard with success

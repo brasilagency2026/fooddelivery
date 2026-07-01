@@ -314,15 +314,14 @@ export const saveMercadoPagoToken = mutation({
   args: {
     restaurantId: v.id("restaurants"),
     accessToken: v.string(),
+    publicKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Basic validation to ensure the restaurant exists
     const restaurant = await ctx.db.get(args.restaurantId);
     if (!restaurant) throw new Error("Restaurant not found");
-    
     await ctx.db.patch(args.restaurantId, {
       mercadoPagoAccessToken: args.accessToken,
+      ...(args.publicKey ? { mercadoPagoPublicKey: args.publicKey } : {}),
     });
   },
 });
-

@@ -15,6 +15,7 @@ export default defineSchema({
     isOpen: v.boolean(),
     approvalStatus: v.string(), // "pending" | "approved" | "rejected"
     mercadoPagoAccessToken: v.optional(v.string()),
+    mercadoPagoPublicKey: v.optional(v.string()),
     cuisine: v.optional(v.string()),
     phone: v.optional(v.string()),
     state: v.optional(v.string()), // e.g. "sp"

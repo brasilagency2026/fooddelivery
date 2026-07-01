@@ -12,13 +12,28 @@ export const getMpPublicKey = action({
     if (!restaurant?.mercadoPagoAccessToken) {
       throw new Error("Restaurante não configurou pagamento");
     }
-    // Fetch credentials from MP API to get the public_key
-    const response = await fetch("https://api.mercadopago.com/v1/account/credentials", {
-      headers: { Authorization: `Bearer ${restaurant.mercadoPagoAccessToken}` },
-    });
+    // Return stored public key if available
+    if ((restaurant as any).mercadoPagoPublicKey) {
+      return (restaurant as any).mercadoPagoPublicKey as string;
+    }
+    // Fallback: fetch from MP API using the credentials endpoint
+    const response = await fetch(
+      `https://api.mercadopago.com/users/me`,
+      { headers: { Authorization: `Bearer ${restaurant.mercadoPagoAccessToken}` } }
+    );
     if (!response.ok) throw new Error("Erro ao obter credenciais MP");
     const data = await response.json();
-    return data.public_key as string;
+    // The public key format for MP Brick is APP_USR-{user_id}
+    // We need to get it from the credentials
+    const credResponse = await fetch(
+      `https://api.mercadopago.com/applications/serial/access_token`,
+      { headers: { Authorization: `Bearer ${restaurant.mercadoPagoAccessToken}` } }
+    );
+    if (credResponse.ok) {
+      const cred = await credResponse.json();
+      if (cred.public_key) return cred.public_key;
+    }
+    throw new Error("Não foi possível obter a public_key. Reconecte o Mercado Pago no painel.");
   },
 });
 
