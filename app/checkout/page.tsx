@@ -40,7 +40,6 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     customerName: "",
     customerPhone: "",
-    customerEmail: "",
     street: "",
     number: "",
     complement: "",
@@ -135,7 +134,6 @@ export default function CheckoutPage() {
     return Boolean(
       form.customerName.trim() &&
       form.customerPhone.trim() &&
-      form.customerEmail.trim() &&
       form.street.trim() &&
       form.number.trim()
     );
@@ -206,7 +204,7 @@ export default function CheckoutPage() {
         payer: {
           firstName: form.customerName.split(" ")[0],
           lastName: form.customerName.split(" ").slice(1).join(" "),
-          email: form.customerEmail,
+          email: `${form.customerPhone.replace(/\D/g, "")}@cliente.foodpronto.com.br`,
           phone: { areaCode: form.customerPhone.slice(0, 2), number: form.customerPhone.slice(2) },
         },
       },
@@ -256,7 +254,7 @@ export default function CheckoutPage() {
               installments: formData?.installments || 1,
               totalAmount: total,
               customerName: form.customerName,
-              customerEmail: form.customerEmail,
+              customerEmail: `${form.customerPhone.replace(/\D/g, "")}@cliente.foodpronto.com.br`,
               customerPhone: form.customerPhone,
               pixMethod: isPix,
             });
@@ -410,7 +408,6 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-3">
                 <InputField label="Nome completo" value={form.customerName} onChange={(v) => updateForm("customerName", v)} placeholder="João Silva" required />
                 <InputField label="WhatsApp" value={form.customerPhone} onChange={(v) => updateForm("customerPhone", v)} placeholder="(11) 99999-9999" type="tel" required />
-                <InputField label="E-mail" value={form.customerEmail} onChange={(v) => updateForm("customerEmail", v)} placeholder="joao@email.com" type="email" required />
               </div>
             </section>
 
