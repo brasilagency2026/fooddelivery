@@ -213,9 +213,8 @@ export default function CheckoutPage() {
         paymentMethods: {
           creditCard: "all",
           debitCard: "all",
-          ticket: "none",       // no boleto
-          bankTransfer: "all",  // PIX
-          maxInstallments: 12,
+          bankTransfer: ["pix"],
+          maxInstallments: 1,
         },
         visual: {
           style: {
