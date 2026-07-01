@@ -59,7 +59,8 @@ export const processPayment = action({
       throw new Error("Restaurante não configurou pagamento");
     }
 
-    const notificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`;
+    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://delivery.foodpronto.com.br";
+    const notificationUrl = `${appUrl}/api/webhooks/mercadopago`;
 
     const paymentBody: any = {
       transaction_amount: Math.round(args.totalAmount * 100) / 100,
