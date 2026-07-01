@@ -178,6 +178,8 @@ export default function AcompanhamentoPage({ params }: { params: { id: string } 
               })}
             </div>
           </section>
+        )}
+
         {isCanceled && (
           <section className="glass-card p-5 text-center">
             <XCircle size={40} className="mx-auto mb-3" style={{ color: "#ef4444" }} />
