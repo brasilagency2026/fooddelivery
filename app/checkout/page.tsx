@@ -215,7 +215,6 @@ export default function CheckoutPage() {
           debitCard: "all",
           ticket: "none",       // no boleto
           bankTransfer: "all",  // PIX
-          mercadoPago: "none",  // no MP wallet login
           maxInstallments: 12,
         },
         visual: {
