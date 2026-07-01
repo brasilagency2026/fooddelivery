@@ -67,6 +67,11 @@ export const createPaymentPreference = action({
       external_reference: args.orderId,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/mercadopago`,
       statement_descriptor: restaurant.name,
+      // Enable guest checkout (no MP account required)
+      binary_mode: false,
+      payment_methods: {
+        default_installments: 1,
+      },
       metadata: {
         order_id: args.orderId,
         restaurant_id: args.restaurantId,
